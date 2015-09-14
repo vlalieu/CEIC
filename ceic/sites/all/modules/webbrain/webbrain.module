@@ -1,0 +1,232 @@
+<?php
+function webbrain_init() {
+// Insert the link and scripts in the header
+
+global $user;
+	    $_SESSION['selected_thought'] = array();
+       $_SESSION['selected_thought']['#value'] = 0;
+}
+
+// function to set the callback menu
+function webbrain_menu() {
+	$items['webbrain'] = array(
+	  'title' => 'webbrain page',
+	  'description' => 'webbrain main page',
+	  'page callback' => 'webbrain_main',
+	  'access callback' => TRUE,
+	);
+	$items['webbrain/commentaire'] = array(
+	  'title' => 'This is a callback function for an Ajax page',
+	  'description' => 'Callback function for an Ajax page.',
+	  'page callback' => 'webbrain_comment_thought',
+	  'theme callback' => 'ajax_base_page_theme', // Sets base theme to be the same as current page.
+	  'access arguments' => array('access content'),
+	  'type' => MENU_CALLBACK,
+	);
+	// ensuite specifier path comment/edit etc.
+	$items['get/ajax'] = array(
+	 'page callback' => 'webbrain_ajax_get_ajax', // Render HTML
+	 'type' => MENU_CALLBACK,
+	 'access arguments' => array('access content'),
+	 'delivery callback' => 'webbrain_ajax_callback',  // Magic goes here
+	);
+
+return $items;
+}
+
+function webbrain_ajax_get_ajax() {
+  // The function called from javascript within webbrain frame will receive the array of arguments after the "get/ajax" prefix
+  $path = implode('/', func_get_args());
+  // $ path to become 'comment/reply/[NID]'
+    
+    $path='comment/9/edit';
+  $render_string = menu_execute_active_handler($path, FALSE);
+  //dsm($render_string);
+  return $render_string;
+}
+function webbrain_ajax_callback($page_callback_result) {
+  print drupal_render($page_callback_result);
+}
+function webbrain_thought_note($form, &$form_state) {
+
+        if(isset($_SESSION['selected_thought']['#value'])) {
+
+ 		 $thought_id = !empty($form_state['values']['comment_thought']) ? $form_state['values']['comment_thought'] : $_SESSION['selected_thought']['#value'];
+	}
+	else {
+		$thought_id=0;
+	}
+// End of javascript code
+	$nid='';
+	$tid='25';
+	$guid='';
+	$isProc=0;
+	$frameHeight=800;
+	if(isset($_REQUEST['nid'])) {
+		$argstr=filter_input(INPUT_GET, 'nid', FILTER_SANITIZE_ENCODED);
+		//drupal_set_message($argstr);
+		$args=explode('_',$argstr);
+
+		if (sizeof($args) > 0) {
+			$nid=$args[0];
+			$tid=$args[1];
+			$guid=$args[2];
+			$cellname=urldecode($args[3]);
+			$isProc=1;
+			$frameHeight=400;
+			}
+		}
+
+  $form['webbrain_map'] = array(
+    '#type' => 'fieldset',
+    '#prefix' => '<p><iframe id="iframeid" name="webbrain" style="width: 100%; height: ' .  $frameHeight . 'px;" src="http://webbrain.com/brain/brain/E4D9107D-EFAE-C27F-909D-ED1F6E4FEEBA/thought/' . $tid . '"></iframe></p>',
+  );
+  
+  // here it can be added a handle marker for the jquery to take action !
+	if ($isProc>0)	{ // id there is some actions
+	  $form['comment_thought'] = array(
+	   '#title' => t('comment the cell ' . $cellname),
+	    '#type' => 'textarea',
+	  );
+	  $form['submit_comment'] = array(
+		'#type' => 'submit',
+		'#value' => t('Submit'),
+		'#ajax' => array(
+		'callback' => 'webbrain_thought_note_callback',
+		'progress' => array('type' => 'none'),
+		    ),
+	  );
+	}
+
+  return $form;
+}
+
+function webbrain_thought_note_callback($form, $form_state) {
+	//dsm($form);
+
+  $commands[] = array("command" => 'getThoughtID',);
+
+  return array('#type' => 'ajax', '#commands' => $commands);	
+//	$_SESSION['selected_thought']['#value']  =  $form['comment_thought']['#value'];
+//return $form['comment_thought'];
+}
+
+function webbrain_block_info() {    
+  $blocks['webbrainblk'] = array(
+    // info: The name of the block.
+    'info' => t('webbrain'),
+  );
+
+  return $blocks;
+}
+function webbrain_block_view($delta = '') {
+  // The $delta parameter tells us which block is being requested.
+  switch ($delta) {
+    case 'webbrainblk':
+      // Create your block content here
+      $block['subject'] = t('webbrain');
+      $block['content'] = drupal_get_form('webbrain_thought_note');
+      break;
+  }
+
+  return $block;
+}
+function computed_field_field_brain_compute(&$entity_field, $entity_type, $entity,
+$field, $instance, $langcode, $items) {
+// drupal_set_message('on passe bien par computed_field_field_brain_compute');
+//drupal_set_message ('ici est la valeur du tid: ' . $entity->field_tid[LANGUAGE_NONE][0]['value']);
+ $entity_field[0]['value']= $entity->field_thoughtid[LANGUAGE_NONE][0]['value'] ;
+}
+
+function computed_field_field_brain_display($field, $entity_field_item, $entity_lang, $langcode, $entity) 	{
+    #dargs();
+	#drupal_set_message($entity_field_item['value']);
+    $iframe='<p><iframe id="iframeid" name="webbrain" style="width: 100%; height: 400px;" src="http://webbrain.com/brain/brain/E4D9107D-EFAE-C27F-909D-ED1F6E4FEEBA/thought/' . $entity_field_item['value'] . '"></iframe></p>';
+return ($iframe);
+}
+
+// computed field pays in the content type document;
+function computed_field_field_pays_compute(&$entity_field, $entity_type, $entity,
+$field, $instance, $langcode, $items) {
+	$author=user_load($entity->uid);
+	$groups = og_get_groups_by_user($author);
+ 	if($groups != NULL) {
+                $grp0=$groups['node'];
+                foreach ($grp0 as $groupe) {
+                        switch($groupe) {
+                        case 43:
+                                 $entity_field[0]['value'] = 'Azerbaijan';
+                                break;
+                        case 44:
+                                $entity_field[0]['value'] =   'Iran';
+                                break;
+                        case 45:
+                                $entity_field[0]['value'] =  'Kazakhstan';
+                                break;
+                        case 42:
+                                $entity_field[0]['value'] =  'Russia';
+                        break;
+                        case 46:
+                                $entity_field[0]['value'] =  'Turkmenistan';
+                                break;
+                        case 47:
+                                $entity_field[0]['value'] =  'Region';
+                                break;
+                        }
+                }
+	}
+	else $entity_field[0]['value'] = $entity->name; //the author of the content
+}
+
+function computed_field_field_pays_display($field, $entity_field_item, $entity_lang, $langcode, $entity)       {
+    $valeur=$entity_field_item['value'];
+	return ($valeur);
+}
+
+function webbrain_main() {
+
+  drupal_add_js('misc/ajax.js');
+  $nodeid = 6; //point sources
+  $thought=6;
+  $ajax_link = '<p>' . l(t('comment me'), 'webbrain/commentaire/nojs/' , array('attributes' => array('class' => array('use-ajax')))) . '</p>';
+
+  $build = array(
+    'ajax_example' => array(
+      '#type' => 'markup',
+      '#markup' => '<div id="idee_note">place ou le comment est insere.</div><div id="changeme">aaa</div>' . $ajax_link,
+    ),
+  );
+
+  return $build;
+}
+function webbrain_comment_thought($type = 'ajax') {
+  if ($type == 'ajax') {
+
+    //drupal_add_css(drupal_get_path('module', 'interact') . '/interact.css');
+    //drupal_add_js(drupal_get_path('module', 'interact') . '/interact-ajax-loaded.js');   
+    
+    
+    $thought=6;
+    drupal_add_js(array('thought' => $thought), 'setting');
+    drupal_add_js(drupal_get_path('module', 'webbrain') . '/wbjs.js');   
+$commands = array();
+    $commands[] = ajax_command_html('#changeme', '<strong>This is some new content.</strong>');
+    
+    //drupal_set_message(t('You just performed an ajax reload.'));
+    $commands[] = ajax_command_prepend('#changeme', theme('status_messages'));
+    
+    $commands[] = ajax_command_changed('#changeme');
+    //$commands[] = ajax_command_css('#changeme', array('background-color' => '#BEBBCE', 'border' => '1px dashed #7F7D8A', 'margin' => '5px', 'padding' => '5px'));
+    //$commands[] = ajax_command_alert('This is an alert command.');
+    
+    $page = array('#type' => 'ajax', '#commands' => $commands);
+    ajax_deliver($page);
+
+  }
+  else {
+    $output = t("This is what would be seen if JavaScript is not enabled.");
+    return $output;
+  }
+}
+?>
+

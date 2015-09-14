@@ -1,0 +1,106 @@
+<?php
+function webbrain_init() {
+// Insert the link and scripts in the header
+
+global $user;
+	    $_SESSION['selected_thought'] = array();
+       $_SESSION['selected_thought']['#value'] = 0;
+}
+
+function webbrain_thought_note($form, &$form_state) {
+
+        if(isset($_SESSION['selected_thought']['#value'])) {
+
+ 		 $thought_id = !empty($form_state['values']['comment_thought']) ? $form_state['values']['comment_thought'] : $_SESSION['selected_thought']['#value'];
+	}
+	else {
+		$thought_id=0;
+	}
+// End of javascript code
+	$nid='';
+	$tid='3';
+	$guid='';
+	$isProc=0;
+	$frameHeight=800;
+	if(isset($_REQUEST['nid'])) {
+		$argstr=filter_input(INPUT_GET, 'nid', FILTER_SANITIZE_ENCODED);
+		//drupal_set_message($argstr);
+		$args=explode('_',$argstr);
+
+		if (sizeof($args) > 0) {
+			$nid=$args[0];
+			$tid=$args[1];
+			$guid=$args[2];
+			$cellname=urldecode($args[3]);
+			$isProc=1;
+			$frameHeight=400;
+			}
+		}
+
+  $form['webbrain_map'] = array(
+    '#type' => 'fieldset',
+    '#prefix' => '<p><iframe id="iframeid" name="webbrain" style="width: 100%; height: ' .  $frameHeight . 'px;" src="http://webbrain.com/brain/brain/FE716B2A-480B-A72D-ACD9-FFFCAB464D62/thought/' . $tid . '"></iframe></p>',
+  );
+	if ($isProc>0)	{ // id there is some actions
+	  $form['comment_thought'] = array(
+	   '#title' => t('comment the cell ' . $cellname),
+	    '#type' => 'textarea',
+	  );
+	  $form['submit_comment'] = array(
+		'#type' => 'submit',
+		'#value' => t('Submit'),
+		'#ajax' => array(
+		'callback' => 'webbrain_thought_note_callback',
+		'progress' => array('type' => 'none'),
+		    ),
+	  );
+	}
+
+  return $form;
+}
+
+function webbrain_thought_note_callback($form, $form_state) {
+	//dsm($form);
+
+  $commands[] = array("command" => 'getThoughtID',);
+
+  return array('#type' => 'ajax', '#commands' => $commands);	
+//	$_SESSION['selected_thought']['#value']  =  $form['comment_thought']['#value'];
+//return $form['comment_thought'];
+}
+
+function webbrain_block_info() {    
+  $blocks['webbrainblk'] = array(
+    // info: The name of the block.
+    'info' => t('webbrain'),
+  );
+
+  return $blocks;
+}
+function webbrain_block_view($delta = '') {
+  // The $delta parameter tells us which block is being requested.
+  switch ($delta) {
+    case 'webbrainblk':
+      // Create your block content here
+      $block['subject'] = t('Country selector');
+      $block['content'] = drupal_get_form('webbrain_thought_note');
+      break;
+  }
+
+  return $block;
+}
+function computed_field_field_brain_compute(&$entity_field, $entity_type, $entity,
+$field, $instance, $langcode, $items) {
+ drupal_set_message('on passe bien par computed_field_field_brain_compute');
+drupal_set_message ('ici est la valeur du tid: ' . $entity->field_tid[LANGUAGE_NONE][0]['value']);
+ $entity_field[0]['value']= $entity->field_tid[LANGUAGE_NONE][0]['value'] ;
+}
+
+function computed_field_field_brain_display($field, $entity_field_item, $entity_lang, $langcode, $entity) 	{
+    #dargs();
+	#drupal_set_message($entity_field_item['value']);
+    $iframe='<p><iframe id="iframeid" name="webbrain" style="width: 100%; height: 400px;" src="http://webbrain.com/brain/brain/FE716B2A-480B-A72D-ACD9-FFFCAB464D62/thought/' . $entity_field_item['value'] . '"></iframe></p>';
+return ($iframe);
+}
+?>
+

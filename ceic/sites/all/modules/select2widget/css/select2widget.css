@@ -1,0 +1,11 @@
+.select2-results{
+    max-height: 400px;
+}
+
+.select2-results .select2-result:nth-child(odd){
+    background-color: #f3f4ee;
+}
+
+.select2-results .select2-result.select2-highlighted{
+    background-color: #3875d7;
+}

@@ -1,0 +1,48 @@
+<?php
+function synaptic_init() {
+// Insert the link and scripts in the header
+
+	  global $user;
+}
+
+function synaptic_block_info() {
+
+  $blocks['synaptik1'] = array(
+    // info: The name of the block.
+    'info' => t('synaptic'),
+  );
+
+  return $blocks;
+}
+
+function synaptic_block_view($delta = '') {
+  // The $delta parameter tells us which block is being requested.
+  switch ($delta) {
+    case 'synaptik1':
+      $block['subject'] = t('synaptic');
+      $block['content'] = drupal_get_form('synaptic_create');
+      break;
+  }
+
+  return $block;
+}
+function synaptic_create() {
+  module_load_include('inc', 'node', 'node.pages'); 
+	$nid=arg(1);
+	//drupal_set_message('my arg' . $a3);
+	$comment = new stdClass;
+	$comment->nid = $nid;
+	$form = drupal_get_form('comment_form', $comment);
+	//$form['author']['#title'] = 'Your Information';
+	$form['author']['#type'] = 'fieldset';
+	$form['author']['#title'] = t('Provide a comment to the cell: ' . $form['#node']->title);
+	//dsm($form);
+	//dargs();
+	return $form;
+	}
+
+function synaptic_form_alter(&$form, &$form_state, $form_id) {
+	dsm($form_state);
+	}
+?>
+

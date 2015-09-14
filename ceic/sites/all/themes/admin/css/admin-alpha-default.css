@@ -1,0 +1,15 @@
+/* This file will hold styles for all layouts using the alpha grid (i.e. not the mobile layout). */
+
+
+/* GLOBAL */
+#zone-content-wrapper {
+	padding-top: 30px;
+}
+
+/* NAVIGATION SYSTEMS */
+/* Admin Sidebar Menu */
+
+.admin-sidebar li a {
+	padding-left: 35px;
+	padding-right: 35px;
+}

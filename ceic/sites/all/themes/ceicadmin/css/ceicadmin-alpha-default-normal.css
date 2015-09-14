@@ -1,0 +1,117 @@
+/* This file will hold styles that are loaded using the same media query as the normal grid. */
+/* If you are using the default media queries provided by Omega, these styles will also
+ *  apply to the widescreen layout unless they are overridden by the widescreen styles. */
+ 
+
+
+/* Thematic Menu */
+.thematic-menu-block {
+	padding-left: 250px;
+	width: 690px;
+}
+.thematic-menu-block ul.inline li {
+	margin-right: 12px !important;
+	width: 100px;
+	height: 80px;
+}
+.thematic-menu-block a.tm-btn {
+	width: 100px;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.tm-pollution {
+	background-position: 0 0;
+}
+.tm-invspecies {
+	background-position: 0 -100px;
+}
+.tm-emergencies {
+	background-position: 0 -200px;
+}
+.tm-biodiversity {
+	background-position: 0 -300px;
+}
+.tm-seafluctuation {
+	background-position: 0 -400px;
+}
+.tm-other {
+	background-position: 0 -500px;
+}
+
+.tm-pollution.active {
+	background-position: -400px 0;
+}
+.tm-invspecies.active {
+	background-position: -400px -100px;
+}
+.tm-emergencies.active {
+	background-position: -400px -200px;
+}
+.tm-biodiversity.active {
+	background-position: -400px -300px;
+}
+.tm-seafluctuation.active {
+	background-position: -400px -400px;
+}
+.tm-other.active {
+	background-position: -400px -500px;
+}
+.tm-pollution:hover {
+	background-position: -200px 0;
+}
+.tm-invspecies:hover {
+	background-position: -200px -100px;
+}
+.tm-emergencies:hover {
+	background-position: -200px -200px;
+}
+.tm-biodiversity:hover {
+	background-position: -200px -300px;
+}
+.tm-seafluctuation:hover {
+	background-position: -200px -400px;
+}
+.tm-other:hover {
+	background-position: -200px -500px;
+}
+
+/* Quick Menu */
+.quick-menu ul.menu li.leaf {
+	list-style-image: none;
+	list-style-type: none;
+	display: inline-block;
+	margin-left: 30px;
+	margin-right: 30px;
+	padding: 0;
+}
+.quick-menu ul li.leaf.first {
+	margin-left: 70px;
+}
+.quick-menu ul li.leaf.last {
+	margin-right: 70px;
+}
+
+
+ 
+/* Toolbox Menu */
+/* This is the default width of all vertical menus. */
+ul.nice-menu-right,
+ul.nice-menu-left,
+ul.nice-menu-right li,
+ul.nice-menu-left li {
+  width: 100px;
+}
+
+/* VERTICAL menus where submenus pop RIGHT (default). */
+ul.nice-menu-right ul {
+  width: 12.5em;
+  left: 100px;
+  top: -1px;
+}
+
+ul.nice-menu-right ul ul {
+  width: 12.5em;
+  left: 12.5em;
+  top: -1px;
+}

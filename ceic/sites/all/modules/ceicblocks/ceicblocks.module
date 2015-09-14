@@ -1,0 +1,19 @@
+<?php
+/**
+ * Implements hook_menu_block_blocks().
+ */
+function ceicblocks_form_alter(&$form, &$form_state){
+
+    $form['#after_build'][] = 'ceicblocks_after_build';
+}
+function ceicblocks_after_build($form, &$form_state) {
+    $form['path']['#access'] = FALSE;
+    $form['menu']['#access'] = FALSE;
+    $form['revision_information']['#access'] = false;
+    $form['comment_settings']['#access'] = false;
+    $form['author']['#access'] = false;
+    //$form['additional_settings']['#access'] = false;
+    return ($form);
+}
+
+?>

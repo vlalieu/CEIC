@@ -1,0 +1,190 @@
+<?php
+function countryselector_init() {
+global $user;
+	$init_country=FALSE;	
+	if(!isset($_SESSION['selected_country'])) {
+		$init_country=TRUE;
+            	}
+	    else {
+		if ($_SESSION['selected_country']['#value'] == '') {
+			$init_country=TRUE;
+			}
+		}
+	if ($init_country) {
+	    $_SESSION['selected_country'] = array();
+		foreach ($user->roles as $role) {
+			switch($role) {
+			case "Azerbaijan":
+				$_SESSION['selected_country']['#value'] = 41;
+				break;
+			case "Iran":
+				$_SESSION['selected_country']['#value'] = 42;
+				break;
+			case "Kazakhstan":
+				$_SESSION['selected_country']['#value'] = 40;
+				break;
+			case "Russia":
+				$_SESSION['selected_country']['#value'] = 39;
+			break;
+			case "Turkmenistan":
+				$_SESSION['selected_country']['#value'] = 43;
+				break;
+			}
+		}
+	}	
+}
+
+// The Node Form Alter example needs to be in another file.
+module_load_include('inc', 'countryselector', 'countryselector_node_form_alter.inc');
+
+/**$_SESSION['selected_country'] = array();
+ * AJAX-enabled select element causes replacement of a set of checkboxes
+ * based on the selection.
+ */
+function countryselector_autocheckboxes($form, &$form_state) {
+  // Since the form builder is called after every AJAX request, we rebuild
+  // the form based on $form_state.
+  
+  $country_id = !empty($form_state['values']['country_select']) ? $form_state['values']['country_select'] : $_SESSION['selected_country']['#value'];
+
+  $form['country_select'] = array(
+//    '#title' => t('Select the country'),
+    '#type' => 'select',
+    '#options' => array(41 => 'Azerbaijan' , 42 => 'Iran', 40 => 'Kazakhstan', 39 => 'Russia' , 43 => 'Turkmenistan'),
+    '#default_value' => $country_id,
+    '#ajax' => array(
+      'callback' => 'countryselector_autocheckboxes_callback',
+      'wrapper' => 'checkboxes-div',
+      //'method' defaults to replaceWith, but valid values also include
+      // append, prepend, before and after.
+      // 'method' => 'replaceWith',
+      // 'effect' defaults to none. Other valid values are 'fade' and 'slide'.
+      // See countryselector_autotextfields for an example of 'fade'.
+      'effect' => 'slide',
+      // 'speed' defaults to 'slow'. You can also use 'fast'
+      // or a number of milliseconds for the animation to last.
+      // 'speed' => 'slow',
+      // Don't show any throbber...
+      'progress' => array('type' => 'none'),
+    ),
+  );
+
+
+  $form['current_country'] = array(
+    '#title' => 'tout le forme est mis en commentaire :) ',
+    // The prefix/suffix provide the div that we're replacing, named by
+    // #ajax['wrapper'] above.
+    '#prefix' => '<div id="checkboxes-div"><img alt src="http://www.kaspinfo.com/kic/sites/default/files/cntr' . $country_id . '.png"><!-- ',
+    '#suffix' => ' --></div>',
+    '#type' => 'radio',
+    '#value' =>  FALSE,
+  );
+
+
+  return $form;
+}
+
+/**
+ * Callback element needs only select the portion of the form to be updated.
+ * Since #ajax['callback'] return can be HTML or a renderable array (or an
+ * array of commands), we can just return a piece of the form.
+ * See @link countryselector_advanced.inc AJAX Advanced Commands for more details
+ * on AJAX framework commands.
+ *
+ * @return renderable array (the checkboxes fieldset)
+ */
+function countryselector_autocheckboxes_callback($form, $form_state) {
+	//dsm($form);
+	$_SESSION['selected_country']['#value']  =  $form['country_select']['#value'];
+return $form['current_country'];
+}
+
+/**
+ * @} End of "defgroup countryselector".
+ */
+
+
+
+function countryselector_searchdocs($form, &$form_state) {
+  $search_string = !empty($form_state['values']['docs_search']) ? $form_state['values']['docs_search'] : '';
+
+  $form['sd_cntr_sel'] = array(
+    '#type' => 'select',
+    '#title' => t('country'),
+    '#options' => array('' => 'any' ,'azerbaijan' => 'Azerbaijan' , 'iran' => 'Iran', 'kazakhstan' => 'Kazakhstan', 'russia' => 'Russia' , 'turkmenistan' => 'Turkmenistan'),
+    '#default_value' => '',
+    '#prefix' => '<table><td>',
+    '#suffix' => '</td>',
+  );
+
+  $form['sd_dir_sel'] = array(
+    '#type' => 'select',
+    '#title' => t('folder'),
+    '#options' => array('' => 'any' ,
+		'alien_species' => 'alien_species',
+		'capacity_building' => 'capacity_building',
+		'coastal_zone_management' => 'coastal_zone_management',
+		'country_overview' => 'country_overview',
+		'databases' => 'databases',
+		'env_impact_assess' => 'env_impact_assess',
+		'environmental_emergencies' => 'environmental_emergencies',
+		'legal_instruments' => 'legal_instruments',
+		'monitoring' => 'monitoring',
+		'pollution' => 'pollution',
+		'pollution/dumping' => 'pollution/dumping',
+		'pollution/land_based_sources' => 'pollution/land_based_sources',
+		'pollution/other' => 'pollution/other',
+		'pollution/seabed_activities' => 'pollution/seabed_activities',
+		'pollution/vessels' => 'pollution/vessels',
+		'projects' => 'projects',
+		'projects/grant' => 'projects/grant',
+		'protection_marine_life' => 'protection_marine_life',
+		'public_participation' => 'public_participation',
+		'research_developmt' => 'research_developmt',
+		'sea_fluctuation' => 'sea_fluctuation',),
+    '#default_value' => '',
+    '#prefix' => '<td>',
+    '#suffix' => '</td>',
+  );
+
+  $form['docs_search'] = array(
+    '#title' => t('search string'),
+    '#type' => 'textfield',
+    '#prefix' => '<td>',
+    '#suffix' => '</td>',
+    '#size'=> 32,
+    '#default_value' => $search_string,
+  );
+
+  $form['docsearch_submit'] = array(
+    '#type' => 'submit',
+    '#prefix' => '<td>',
+    '#suffix' => '</td></table>',
+    '#ajax' => array(
+      'callback' => 'search_submit_callback',
+      'wrapper' => 'result_box',
+      'name' => 'submit421',
+    ),
+    '#value' => t('Search'),
+  );
+
+  $form['result_box'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<div id="result_box">',
+    '#suffix' => '</div>',
+    '#markup' => '<h2>search results</h2>',
+  );
+
+
+
+  return $form;
+}
+
+function search_submit_callback($form, $form_state) {
+  $element = $form['result_box'];
+  $sstr=urlencode($form['docs_search']['#value']);
+  if (strlen($sstr) < 3) $sstr = 'nixberniks';
+  $element['#markup'] = '<div id="texfield-div"><h2>' . shell_exec('/var/www/kic/sites/all/modules/countryselector/filesearch.sh ' . $sstr . ' ' . $form['sd_cntr_sel']['#value']  . ' ' . $form['sd_dir_sel']['#value'])  . '</h2></div>';
+  return $element;
+}
+

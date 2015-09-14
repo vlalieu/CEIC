@@ -1,0 +1,246 @@
+
+
+/* Thematic Menu */
+.thematic-menu-block {
+	/*float: left;*/
+	text-transform: capitalize;
+	height: 64px;
+	/*margin-top: 17px;*/
+	position: absolute;
+	left: 0;
+	z-index: 990;
+}
+.thematic-menu-block ul {
+	margin-bottom: 0;
+}
+
+.thematic-menu-block li a {
+	display: inline-block;
+}
+.thematic-menu-block ul.inline li {
+	padding: 0 !important;
+}
+.thematic-menu-block ul.inline li.last {
+	margin-right: 0 !important;
+}
+
+.thematic-menu-block a.tm-pollution,
+.thematic-menu-block a.tm-invspecies,
+.thematic-menu-block a.tm-emergencies,
+.thematic-menu-block a.tm-biodiversity,
+.thematic-menu-block a.tm-seafluctuation,
+.thematic-menu-block a.tm-other {
+	background-image: url('../img/thematic-menu-sprite.png');
+	background-repeat: no-repeat;
+	padding-top: 40px !important;
+	padding-bottom: 0 !important;
+	line-height: 16px;
+	text-align: center;
+	height: 40px !important;
+	vertical-align: middle !important;
+	text-decoration: none;
+}
+.thematic-menu-block a.tm-pollution:link,
+.thematic-menu-block a.tm-pollution:visited,
+.thematic-menu-block a.tm-invspecies:link,
+.thematic-menu-block a.tm-invspecies:visited,
+.thematic-menu-block a.tm-emergencies:link,
+.thematic-menu-block a.tm-emergencies:visited,
+.thematic-menu-block a.tm-biodiversity:link,
+.thematic-menu-block a.tm-biodiversity:visited,
+.thematic-menu-block a.tm-seafluctuation:link,
+.thematic-menu-block a.tm-seafluctuation:visited,
+.thematic-menu-block a.tm-other:link,
+.thematic-menu-block a.tm-other:visited {
+	color: #7A706E;
+}
+.thematic-menu-block a.tm-pollution.active,
+.thematic-menu-block a.tm-invspecies.active,
+.thematic-menu-block a.tm-emergencies.active,
+.thematic-menu-block a.tm-biodiversity.active,
+.thematic-menu-block a.tm-seafluctuation.active,
+.thematic-menu-block a.tm-other.active {
+	color: #E86F56;
+}
+.thematic-menu-block a.tm-pollution:hover,
+.thematic-menu-block a.tm-invspecies:hover,
+.thematic-menu-block a.tm-emergencies:hover,
+.thematic-menu-block a.tm-biodiversity:hover,
+.thematic-menu-block a.tm-seafluctuation:hover,
+.thematic-menu-block a.tm-other:hover {
+	  color: #fff; 
+}
+
+
+/* Menu Minipanels */
+.menu-minipanels {
+	text-transform: capitalize;
+}
+.qtip {
+	margin-left: -20px !important;
+	/*margin-top: -30px !important;*/
+}
+.menu-minipanels h2.pane-title {
+	font-size: 16px;
+}
+.pane-thematic-navigation-invspecies-pane .item-list ul {
+	/*display: inline-block;*/
+}
+.pane-thematic-navigation-invspecies-pane .item-list ul li {
+	display: inline;
+}
+
+/* Toolbox Menu */
+.toolbox-menu {
+}
+.toolbox-menu ul {
+	list-style-type: none;
+}
+.toolbox-menu ul.nice-menu {
+	border-top: none;
+}
+.toolbox-menu ul.nice-menu li {
+  border: none;
+  border-top: 0;
+  float: left; /* LTR */
+  background-color: #eee;
+	margin: 0;
+	display: block;
+	list-style: none;
+	line-height: 130px;
+	background-color: #f6f6f6;
+}
+.toolbox-menu ul.nice-menu li:hover {
+	color: #3e3e3e;
+	background-color: #f6f6f6;
+}
+.toolbox-menu ul.nice-menu li.active-trail {
+	color: #3e3e3e;
+	background-color: #f6f6f6;
+}
+.toolbox-menu ul.nice-menu li.last {
+	margin-bottom: 20px;
+}
+ul.nice-menu-right li {
+	width: 110px !important;
+}
+ul.nice-menu-right li li {
+	width: 200px !important;
+}
+ul.nice-menu-right li.menuparent {
+	background-image: none;
+}
+ul.nice-menu-right li.menuparent:hover {
+  background: transparent url("../img/arrow-right.png") right center no-repeat;
+}
+ul.nice-menu-right li li.menuparent {
+  background: #eee url("../img/arrow-right.png") right center no-repeat;
+}
+
+.toolbox-menu ul.nice-menu li a {
+	color: #a6a7a2;
+	background-image: url('../img/sidebar-first-sprite.png');
+	background-repeat: no-repeat;
+	display: block;
+	text-align: center;
+	width: 90px;
+	height: 86px;
+	border-bottom: 1px solid #e0e0d8;
+	padding: 0;
+	text-decoration: none;
+}
+
+
+
+.toolbox-menu a:link,
+.toolbox-menu a:visited {
+	color: #7EBDBA;
+}
+.toolbox-menu a.active {
+	color: #3e3e3e;
+	border-bottom: 1px solid #7EBDBA;
+}
+
+.toolbox-menu ul.nice-menu li a.active,
+.toolbox-menu ul.nice-menu li a:hover {
+	color: #3e3e3e;
+}
+
+
+/* Toolbox second level */
+.toolbox-menu ul.nice-menu ul {
+  border-top: none;
+  margin-right: 0;
+}
+.toolbox-menu ul.nice-menu-right ul {
+  width: 180px;
+  left: 110px;
+ }
+.toolbox-menu ul.nice-menu li ul li {
+	top: 25px;
+	line-height: 20px;
+	background: #e0e0d8;
+	width: 200px;
+}
+.toolbox-menu ul.nice-menu li ul li a {
+	color: #3e3e3e;
+	text-align: left !important;
+	background-image: none;
+	width: 190px;
+	height: 30px;
+	padding-top: 10px;
+	padding-left: 10px;
+}
+
+.toolbox-menu ul.nice-menu li ul li a.active,
+.toolbox-menu ul.nice-menu li ul li a:hover {
+	color: #e0e0d8;
+	background: #E86F56;
+}
+
+
+
+a.btn-adm-files {
+	background-position: 0 0;
+}
+a.btn-adm-events {
+	background-position: 0 -100px;
+}
+a.btn-adm-org {
+	background-position: 0 -200px;
+}
+a.btn-adm-projects {
+	background-position: 0 -300px;
+}
+a.btn-adm-maps {
+	background-position: 0 -400px;
+}
+a.btn-adm-tools {
+	background-position: 0 -500px;
+}
+
+a.btn-adm-files.active,
+a.btn-adm-files:hover {
+	background-position: -150px 0;
+}
+a.btn-adm-events.active,
+a.btn-adm-events:hover {
+	background-position: -150px -100px;
+}
+a.btn-adm-org.active,
+a.btn-adm-org:hover {
+	background-position: -150px -200px;
+}
+a.btn-adm-projects.active,
+a.btn-adm-projects:hover {
+	background-position: -150px -300px;
+}
+a.btn-adm-maps.active,
+a.btn-adm-maps:hover {
+	background-position: -150px -400px;
+}
+a.btn-adm-tools.active,
+a.btn-adm-tools:hover {
+	background-position: -150px -500px;
+}
+

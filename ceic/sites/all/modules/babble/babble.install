@@ -1,0 +1,145 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the babble module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function babble_schema() {
+  $schema['babble'] = array(
+    'description' => 'Babble comment entity.',
+    'fields' => array(
+      'bid' => array(
+        'description' => 'Primary identifier of the comment.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'entity_id' => array(
+        'description' => 'The primary identifier of the entity that this comment is attached to.',
+        'type' => 'int',
+        'not null' => TRUE
+      ),
+      'entity_type' => array(
+        'description' => 'The type of the entity that this comment is attached to.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE
+      ),
+      'field_name' => array(
+        'description' => 'The name of the field that this comment is attached to. This is also the bundle of the babble entity.',
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'The users.uid who authored the comment. If set to 0, this comment was created by an anonymous user.',
+        'type' => 'int',
+        'length' => 11,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'hostname' => array(
+        'description' => "The author's host name.",
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => TRUE
+      ),
+      'created' => array(
+        'description' => 'The time that the comment was created, as a Unix timestamp.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The time that the comment was last edited, as a Unix timestamp.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'status' => array(
+        'description' => 'The published status of a comment. (0 = Not Published, 1 = Published)',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+        'size' => 'tiny',
+      ),
+      'language' => array(
+        'description' => 'The languages.language of this comment.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => LANGUAGE_NONE
+      ),
+    ),
+    'primary key' => array('bid'),
+  );
+
+  $schema['babble_statistics'] = array(
+    'description' => 'Maintains statistics of node and comments posts to show "new" and "updated" flags.',
+    'fields' => array(
+      'entity_id' => array(
+        'description' => 'The primary identifier of the entity that the statistics are being logged for.',
+        'type' => 'int',
+        'not null' => TRUE
+      ),
+      'entity_type' => array(
+        'description' => 'The type of the entity that the statistics are being logged for.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE
+      ),
+      'field_name' => array(
+        'description' => 'The name of the field that the statistics are being logged for.',
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+      ),
+      'first_comment' => array(
+        'description' => 'The {babble}.bid of the first comment.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'last_comment' => array(
+        'description' => 'The {babble}.bid of the last comment.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'comment_count' => array(
+        'description' => 'The total number of comments on this host.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('entity_type', 'entity_id', 'field_name'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_field_schema().
+ */
+function babble_field_schema($field) {
+  return array(
+    'columns' => array(
+      'access' => array(
+        'description' => 'Whether comments are allowed on the entity that this field is attached to: 0 = no, 1 = closed (read only), 2 = open (read/write).',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+  );
+}

@@ -1,0 +1,7 @@
+name = ceicfields Module
+description = "ceicfields module."
+package = ceicfields
+core = 7.x
+files[] = ceicfields.module
+version = "1.01-dev"
+

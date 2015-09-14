@@ -1,0 +1,7 @@
+name = synaptic Module
+description = "synaptic module."
+package = synaptic
+core = 7.x
+files[] = synaptic.module
+version = "1.01-dev"
+

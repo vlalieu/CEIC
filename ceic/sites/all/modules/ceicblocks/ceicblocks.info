@@ -1,0 +1,7 @@
+name = ceicblocks Module
+description = "ceicblocks module."
+package = ceicblocks
+core = 7.x
+files[] = ceicblocks.module
+version = "1.01-dev"
+

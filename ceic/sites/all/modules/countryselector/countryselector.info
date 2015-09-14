@@ -1,0 +1,7 @@
+name = countryselector Module
+description = "countryselector module."
+package = countryselector
+core = 7.x
+files[] = countryselector.module
+version = "1.01-dev"
+

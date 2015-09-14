@@ -1,0 +1,116 @@
+<?php
+function webbrain_init() {
+// Insert the link and scripts in the header
+/**<!--
+$el1 = array(
+  '#tag' => 'link', 
+  '#attributes' => array( 
+    'href' => 'magnific-popup/magnific-popup.css',
+    'rel' => 'stylesheet',
+    'type' => 'text/css',
+  ),
+);
+drupal_add_html_head($el1);
+
+$el2 = array(
+  '#type' => 'markup',
+  '#markup' => '<script language="javascript" type="text/javascript" src="magnific-popup/jquery.magnific-popup.js">api_key: magnifique</script>' . '\r',
+  '#weight' => 10000,
+);
+drupal_add_html_head($el2);
+-->
+**/
+global $user;
+	    $_SESSION['selected_thought'] = array();
+       $_SESSION['selected_thought']['#value'] = 0;
+}
+
+function webbrain_thought_note($form, &$form_state) {
+
+        if(isset($_SESSION['selected_thought']['#value'])) {
+
+ 		 $thought_id = !empty($form_state['values']['comment_thought']) ? $form_state['values']['comment_thought'] : $_SESSION['selected_thought']['#value'];
+	}
+	else {
+		$thought_id=0;
+	}
+// Magific popup Javascript	
+	drupal_add_js(
+		"(function ($) {
+		      //your code here
+			$('#though-comment').magnificPopup({
+					src: '#my-popup',
+					type: 'inline'
+					});
+		}(jQuery));",
+		"inline"
+	);
+// Here the javascript code that will be lauched in the Callback function
+	  drupal_add_js(
+	    'Drupal.ajax.prototype.commands.getThoughtID = function(ajax, response, status) {
+	      // Whatever you want to do. i.e. :
+	      //var thought = document.getElementById("astarte");
+		 //alert("le contenu du div est: ");
+	      //console.log(thought); 
+	      //throw new Error("vindjeu dans le callback.");
+		//var xx = printStackTrace();
+		   //console.log("salut les gars! " + window.document.activeElement);
+	      //
+	    }',
+	    'inline'
+	  );
+ 
+// End of javascript code
+
+  $form['comment_thought'] = array(
+   '#title' => t('comment selected node'),
+    '#type' => 'textarea',
+    '#default_value' => $thought_id,
+    '#ajax' => array(
+      'callback' => 'webbrain_thought_note_callback',
+      'progress' => array('type' => 'none'),
+    ),
+    '#prefix' => '<p><iframe id="iframeid" name="webbrain" style="width: 100%; height: 800px;" src="http://webbrain.com/brain/brain/FE716B2A-480B-A72D-ACD9-FFFCAB464D62/thought/3"></iframe></p>',
+	 '#suffix' => '
+		<p><button id="thought-comment" >Activer le popup magnifique</button></p>
+		<div id="my-popup" class="mfp-hide white-popup">
+		  Inline popup
+		</div>',
+  );
+
+
+  return $form;
+}
+
+function webbrain_thought_note_callback($form, $form_state) {
+	//dsm($form);
+
+  $commands[] = array("command" => 'getThoughtID',);
+
+  return array('#type' => 'ajax', '#commands' => $commands);	
+//	$_SESSION['selected_thought']['#value']  =  $form['comment_thought']['#value'];
+//return $form['comment_thought'];
+}
+
+function webbrain_block_info() {    
+  $blocks['webbrainblk'] = array(
+    // info: The name of the block.
+    'info' => t('webbrain'),
+  );
+
+  return $blocks;
+}
+function webbrain_block_view($delta = '') {
+  // The $delta parameter tells us which block is being requested.
+  switch ($delta) {
+    case 'webbrainblk':
+      // Create your block content here
+      $block['subject'] = t('Country selector');
+      $block['content'] = drupal_get_form('webbrain_thought_note');
+      break;
+  }
+
+  return $block;
+}
+?>
+

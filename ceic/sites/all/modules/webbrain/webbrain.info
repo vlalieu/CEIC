@@ -1,0 +1,7 @@
+name = webbrain Module
+description = "webbrain module."
+package = webbrain
+core = 7.x
+files[] = webbrain.module
+version = "1.01-dev"
+

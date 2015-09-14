@@ -1,0 +1,8 @@
+name = selcntrctx Module
+description = "selcntrctx module."
+package = selcntrctx
+core = 7.x
+files[] = selcntrctx.module
+files[] = selcntrctx_context_condition_kazak.inc
+version = "1.01-dev"
+

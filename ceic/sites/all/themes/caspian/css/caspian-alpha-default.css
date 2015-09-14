@@ -1,0 +1,139 @@
+/* This file will hold styles for all layouts using the alpha grid (i.e. not the mobile layout). */
+/* Mobile up */
+ .galleria{ width: 700px; height: 400px; background: #000 }
+.galleria-container {
+    height: auto !important; /* Overrides any hard coded container pixel height. */
+    max-width: 100%; /* Keeps the container responsive */
+    min-height: 320px; /* A must, since height is auto now, to avoid collapsing or bad resizing. Adjust this to the actual expected minimum height, and also provide per media query like below for more fine-grained dimensions */
+}
+/* Desktop up */
+@media (min-width: 73em) {
+  div[id^="scald-gallery"], 
+  .galleria-container {
+      min-height: 420px;
+  }
+}
+#body-add-more-wrapper #edit-comment-body-und-0-format {display: none;}
+.form-item-comment-body-und-0-value {
+        visibility:hidden;
+	}
+.edit-comment-body-und-0-format{
+        visibility:hidden;
+	}
+.filter-wrapper {
+        visibility:hidden;
+        }
+
+/* GLOBAL */
+
+.page {
+	background-image: url(../img/header_background.png) !important;
+	background-position: top !important;
+	background-repeat: repeat-x;
+}
+
+.zone-user-wrapper {
+	height: 22px;
+	background: url(../img/bg-zone-user.png) repeat-x;
+}
+.zone-branding-wrapper {
+	height: 120px;
+	background: url(../img/bg-zone-branding.png) repeat-x;
+}
+.zone-branding {
+	padding-top: 20px;
+}
+h6.site-slogan {
+	font-size: 24px;
+	line-height: 82px;
+}
+.zone-menu-wrapper {
+	height: 80px;
+	background: url(../img/bg-zone-menu.png) repeat-x;
+}
+.front .zone-header-wrapper {
+	background: url(../img/bg-zone-header.png) repeat-x;
+}
+.not-front .section-content {
+	background: url(../img/bg-zone-header.png) repeat-x;
+}
+.section-footer {
+	height: 63px;
+	background: url(../img/footer.png) repeat-x;
+	/*background-image: url(../img/footer.png) !important;
+	background-position: center center !important;
+	background-repeat: no-repeat !important;
+	background-color: transparent !important;*/
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=black000,endColorstr=black000) !important;
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=black000,endColorstr=black000) !important;";
+}
+
+#zone-content-wrapper {
+	padding-top: 30px;
+}
+
+
+/* HEADER */
+/* Slideshow */
+/*.front .zone-header.container-12 {
+	width: 100% !important;
+}
+.front .container-12 .grid-12.region-header-first {
+	width: 100% !important;
+	margin: 0px !important;
+}*/
+
+/* ZONE MENU */
+
+
+
+/* NAVIGATION SYSTEMS */
+/* Navigation Menu */
+
+.navigation-menu ul {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.navigation-menu ul.menu li {
+	margin: 0px;
+}
+
+/* CONTENT */
+.btn-share {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+/* POSTSCRIPT */
+.postscript-notice {
+	background-color: #f8f8f8;
+	
+	margin-top: 20px;
+	margin-bottom: 20px;
+	border: 3px solid #aaaaaa;
+	padding: 10px 10px 0;
+}
+.notice-inside {
+	
+}
+.logo-bp {
+	display: none;
+}
+
+.postscript-logos {
+	text-align: center;
+	margin-bottom: 30px;
+}
+
+/* FOOTER */
+.zone-footer {
+	padding-top: 10px;
+}
+.footer-disclaimer {
+	text-align: right;
+}
+.footer-disclaimer a {
+	font-size: 11px;
+	color: black;
+}

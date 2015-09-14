@@ -1,0 +1,48 @@
+<?php
+function socialpict_init() {
+// Insert the link and scripts in the header
+
+}
+
+function socialpict_block_info() {
+
+    $blocks['socialpict'] = array(
+        // info: The name of the block.
+        'info' => t('socialpict'),
+    );
+
+    return $blocks;
+}
+
+function socialpict_block_view($delta = '') {
+    global $user;
+    global $base_url;
+    // The $delta parameter tells us which block is being requested.
+    switch ($delta) {
+        case 'socialpict':
+            //$pictdir = '/sites/default/files/styles/thumbnail/public/pictures/picture-';
+            $pictdir = '/sites/default/files/pictures/picture-';
+            $aa0='ls /var/www/ceic' . $pictdir . $user->uid . '-*.jpg';
+            // the picture is not there i the first shot - is shown at the reload.
+            $aaa = shell_exec($aa0);
+            if (strlen($aaa) > 4)   {
+                $xxx=explode('picture-' .$user->uid . '-', $aaa);
+                $yyy=explode('.jpg', $xxx[1]);
+                $bbb= '<img title="' .$user->name. '" alt="' .$user->name. '" width=50 src="' . $base_url . $pictdir . $user->uid . '-' . rtrim($yyy[0]) .'.jpg?itok=uimIwWB5" typeof="foaf:Image">';
+                }
+            else {
+                $bbb=$user->name;
+                }
+            $ccc='<div class="user-pic"><a href="' . $base_url .'/user">' . t($bbb) . '</a></div>';
+            $ccc.='<div class="user-logout"><ul class="user-top"><li class="user-top-logout"><a class="btn-logout" alt="logout" href="' . $base_url . '/user/logout">Logout</a></li></ul></div>';
+            $block['subject'] = t('socialpict');
+            $block['content'] = array(
+                '#type' => 'markup',
+                '#markup' => $ccc,
+                );
+            break;
+    }
+
+    return $block;
+}
+?>

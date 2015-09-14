@@ -1,0 +1,921 @@
+<?php
+
+/**
+ * Load the field definition include file.
+ */
+require_once dirname(__FILE__) . '/includes/babble.field.inc';
+
+/**
+ * Comment is awaiting approval.
+ */
+define('BABBLE_NOT_PUBLISHED', 0);
+
+/**
+ * Comment is published.
+ */
+define('BABBLE_PUBLISHED', 1);
+
+/**
+ * Comments for this node are hidden.
+ */
+define('BABBLE_COMMENTS_HIDDEN', 0);
+
+/**
+ * Comments for this node are closed.
+ */
+define('BABBLE_COMMENTS_CLOSED', 1);
+
+/**
+ * Comments for this node are open.
+ */
+define('BABBLE_COMMENTS_OPEN', 2);
+
+/**
+ * No title field is defined.
+ */
+define('BABBLE_TITLE_FIELD_UNDEFINED', '_none');
+
+/**
+ * Implements hook_menu().
+ */
+function babble_menu() {
+  $items['babble/%babble'] = array(
+    'title' => 'Comment permalink',
+    'page callback' => 'babble_permalink',
+    'page arguments' => array(1),
+    'access callback' => 'babble_access',
+    'access arguments' => array('view', 1),
+    'file' => 'includes/babble.ui.inc',
+  );
+
+  $items['babble/%babble/view'] = array(
+    'title' => 'View comment',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10
+  );
+
+  $items['babble/%babble/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'entity_ui_get_form',
+    'page arguments' => array('babble', 1),
+    'access callback' => 'babble_access',
+    'access arguments' => array('update', 1),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'includes/babble.ui.inc',
+  );
+
+  $items['babble/%babble/reply'] = array(
+    'title' => 'Reply',
+    'page callback' => 'babble_reply_page',
+    'page arguments' => array(1),
+    'access callback' => 'babble_reply_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'includes/babble.ui.inc',
+  );
+
+  $items['babble/%babble/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('babble_delete_form', 1),
+    'access callback' => 'babble_access',
+    'access arguments' => array('delete', 1),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'weight' => 10,
+    'file' => 'includes/babble.ui.inc',
+  );
+
+  $items['babble/%babble/approve'] = array(
+    'title' => 'Approve',
+    'page callback' => 'babble_approve',
+    'page arguments' => array(1),
+    'access callback' => 'babble_approve_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'includes/babble.ui.inc',
+  );
+
+  $items['admin/structure/babble'] = array(
+    'title' => 'Babble',
+    'description' => 'Manage babble types.',
+    'page callback' => 'babble_type_overview',
+    'access arguments' => array('administer babble'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/babble.admin.inc',
+  );
+
+  $items['admin/structure/babble/%babble_field_name'] = array(
+    'title' => 'Edit Babble',
+    'title callback' => 'babble_title_callback',
+    'title arguments' => array(3),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('babble_type_edit_form', 3),
+    'access arguments' => array('administer babble'),
+    'file' => 'includes/babble.admin.inc',
+  );
+
+  $items['admin/structure/babble/%babble_field_name/edit'] = array(
+    'title' => 'Edit',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  if (module_exists('devel')) {
+    $items['babble/%babble/devel'] = array(
+      'title' => 'Devel',
+      'page callback' => 'devel_load_object',
+      'page arguments' => array('babble', 1),
+      'access arguments' => array('access devel information'),
+      'type' => MENU_LOCAL_TASK,
+      'file path' => drupal_get_path('module', 'devel'),
+      'file' => 'devel.pages.inc',
+      'weight' => 100,
+    );
+
+    $items['babble/%babble/devel/load'] = array(
+      'title' => 'Load',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+    );
+
+    $items['babble/%babble/devel/render'] = array(
+      'title' => 'Render',
+      'page callback' => 'devel_render_object',
+      'page arguments' => array('babble', 1),
+      'access arguments' => array('access devel information'),
+      'type' => MENU_LOCAL_TASK,
+      'file path' => drupal_get_path('module', 'devel'),
+      'file' => 'devel.pages.inc',
+      'weight' => 100,
+    );
+  }
+
+  return $items;
+}
+
+/**
+ * Implements hook_entity_info()
+ */
+function babble_entity_info() {
+  $info['babble'] = array(
+    'label' => t('Babble'),
+    'module' => 'babble',
+    'entity class' => 'Babble',
+    'controller class' => 'BabbleController',
+    'base table' => 'babble',
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'access callback' => 'babble_access',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'id' => 'bid',
+      'bundle' => 'field_name',
+    ),
+    'bundles' => array(),
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full'),
+        'custom settings' => FALSE,
+      ),
+      'list' => array(
+        'label' => t('List'),
+        'custom settings' => FALSE,
+      ),
+      'reply' => array(
+        'label' => t('Reply'),
+        'custom settings' => FALSE,
+      ),
+    ),
+  );
+
+  // Add info about the bundles. We do not use field_info_fields() but directly
+  // use field_read_fields() as field_info_fields() requires built entity info
+  // to work.
+  foreach (field_read_fields(array('type' => 'babble')) as $field_name => $field) {
+    $info['babble']['bundles'][$field_name] = array(
+      'label' => t('Babble @field', array('@field' => $field_name)),
+      'admin' => array(
+        'path' => 'admin/structure/babble/%babble_field_name',
+        'real path' => 'admin/structure/babble/' . strtr($field_name, array('_' => '-')),
+        'bundle argument' => 3,
+        'access arguments' => array('administer babble'),
+      ),
+    );
+  }
+
+  return $info;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function babble_theme() {
+  $info['babble'] = array(
+    'render element' => 'elements',
+    'template' => 'babble',
+  );
+
+  return $info;
+}
+
+/**
+ * Implements hook_forms().
+ */
+function babble_forms() {
+  $info = entity_get_info('babble');
+  $forms = array();
+  foreach ($info['bundles'] as $bundle => $bundle_info) {
+    // The wrapper callback is invoked by entity_ui_get_form().
+    $forms['babble_edit_' . $bundle . '_form']['callback'] = 'babble_form';
+  }
+
+  return $forms;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function babble_permission() {
+  $perms['administer babble'] = array(
+    'title' => t('Administer comment types'),
+    'restrict access' => TRUE,
+  );
+
+  $perms['manage babbles'] = array(
+    'title' => t('Manage comments'),
+    'description' => t('Allows users to view, edit and delete any comment.'),
+  );
+
+  $perms['manage babble access'] = array(
+    'title' => t('Manage entity comment access'),
+    'description' => t('Allows users to configure commenting access when editing a commentable entity.'),
+  );
+
+  $perms['view own unpublished babbles'] = array(
+    'title' => t('View own unpublished comments'),
+  );
+
+  $perms['skip babble approval'] = array(
+    'title' => t('Skip comment approval'),
+  );
+
+  $perms['delete own babbles'] = array(
+    'title' => t('Delete own comments'),
+  );
+
+  $perms['update own babbles'] = array(
+    'title' => t('Edit own comments'),
+  );
+
+  foreach (field_info_fields() as $field_name => $field) {
+    if ($field['type'] != 'babble') {
+      continue;
+    }
+
+    foreach ($field['bundles'] as $entity_type => $bundles) {
+      foreach ($bundles as $bundle) {
+        $instance = field_info_instance($entity_type, $field_name, $bundle);
+        $info = entity_get_info($entity_type);
+        $key = $entity_type . ':' .  $bundle . ':' . $field_name;
+
+        $perms['create babbles on ' . $key] = array(
+          'title' => t('Post @instance on @bundle (@type)', array('@bundle' => $info['bundles'][$bundle]['label'], '@instance' => $instance['label'], '@type' => $info['label'])),
+        );
+
+        $perms['view babbles on ' . $key] = array(
+          'title' => t('View @instance on @bundle (@type)', array('@bundle' => $info['bundles'][$bundle]['label'], '@instance' => $instance['label'], '@type' => $info['label'])),
+        );
+      }
+    }
+  }
+
+  return $perms;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function babble_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'babble') . '/views',
+  );
+}
+
+/**
+ * Menu system title callback.
+ */
+function babble_title_callback($field_name) {
+  return $field_name;
+}
+
+/**
+ * Load callback for the menu system.
+ */
+function babble_host_load($entity_id, $entity_type, $field_name) {
+  $field = field_info_field($field_name);
+  if (!$field || $field['type'] !== 'babble' || !array_key_exists($entity_type, $field['bundles'])) {
+    // Bail out if the field does not exist, is not a 'babble' field or is not
+    // attached to the given entity type.
+    return FALSE;
+  }
+
+  if (!$entity = entity_load_single($entity_type, $entity_id)) {
+    // Bail out if the entity does not exist.
+    return FALSE;
+  }
+
+  // Load the bundle of the entity.
+  list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+
+  if (!in_array($bundle, $field['bundles'][$entity_type])) {
+    // Bail out if there is no instance of the given field attached to the
+    // bundle of the given entity.
+    return FALSE;
+  }
+
+  return $entity;
+}
+
+/**
+ * Implements hook_admin_menu_map().
+ */
+function babble_admin_menu_map() {
+  if (!user_access('administer babble')) {
+    return;
+  }
+
+  $arguments = array();
+  foreach (field_info_fields() as $field_name => $field) {
+    if ($field['type'] == 'babble') {
+      $arguments[] = strtr($field_name, array('_' => '-'));
+    }
+  }
+
+  if (!empty($arguments)) {
+    $map['admin/structure/babble/%babble_field_name'] = array(
+      'parent' => 'admin/structure/babble',
+      'arguments' => array(
+        array('%babble_field_name' => $arguments),
+      ),
+    );
+
+    return $map;
+  }
+}
+
+/**
+ * Menu callback for loading the actual name of a field.
+ */
+function babble_field_name_load($arg) {
+  $field_name = strtr($arg, array('-' => '_'));
+  if (($field = field_info_field($field_name)) && $field['type'] == 'babble') {
+    return $field_name;
+  }
+
+  return FALSE;
+}
+
+/**
+ * A wrapper around entity_view() to display a single babble entity.
+ */
+function babble_view($entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
+  if (!is_array($entities)) {
+    $entities = array($entities);
+  }
+
+  return entity_view('babble', $entities, $view_mode, $langcode, $page);
+}
+
+/**
+ * Loads a single babble entity.
+ *
+ * @param $id
+ *   The primary identifier of the entity to be loaded.
+ *
+ * @return
+ *   The entity object or FALSE if not found.
+ */
+function babble_load($id) {
+  return entity_load_single('babble', $id);
+}
+
+/**
+ * Load babble entities from the database.
+ *
+ * @param $ids array
+ *   The list of entity IDs to be loaded.
+ * @param $conditions array
+ *   Conditions by which entities can be filtered.
+ *
+ * @return
+ *   An array of entity objects indexed by their ids. When no results are
+ *   found, an empty array is returned.
+ */
+function babble_load_multiple($ids = array(), $conditions = array()) {
+  return entity_load('babble', $ids, $conditions);
+}
+
+/**
+ * Load all babble entities that belong to a specific host entity and bundle.
+ *
+ * @param $entity_type
+ *   The entity type of the host entity to load the babble entities for.
+ * @param $entity_id
+ *   The ID of the host entity to load the babble entities for.
+ * @param $bundle
+ *   The bundle of the babble entity. This is the field name of the babble field
+ *   on the host entity.
+ *
+ * @return
+ *   An array of entity objects indexed by their ids. When no results are
+ *   found, an empty array is returned.
+ */
+function babble_load_by_host($entity_type, $entity_id, $bundle) {
+  $query = new EntityFieldQuery();
+  $query = $query->entityCondition('entity_type', 'babble')
+    ->propertyCondition('entity_type', $entity_type)
+    ->propertyCondition('entity_id', $entity_id)
+    ->propertyCondition('field_name', $bundle);
+
+  $result = $query->execute();
+  if (!empty($result['babble'])) {
+    return entity_load_multiple_by_name('babble', array_keys($result['babble']));
+  }
+
+  return FALSE;
+}
+
+/**
+ * Determine whether the current user may perform the given operation on the
+ * specified babble.
+ *
+ * @param $op
+ *   The operation to be performed on the babble. Possible values are:
+ *   - "view"
+ *   - "update"
+ *   - "delete"
+ *   - "create"
+ * @param $babble
+ *   (Optional) The babble object on which the operation is to be performed.
+ * @param $account
+ *   (Optional) A user object representing the user for whom the operation is to
+ *   be performed. Determines access for a user other than the current user.
+ *
+ * @return bool
+ *   TRUE if the operation may be performed, FALSE otherwise.
+ */
+function babble_access($op, $babble = NULL, $account = NULL, $field_name = NULL, $entity_type = NULL, $entity = NULL) {
+  // We either need a babble or a host entity.
+  if (!($babble || ($field_name && $entity_type && $entity))) {
+    return FALSE;
+  }
+
+  // If the op was not one of the supported ones, we return access denied.
+  if (!in_array($op, array('view', 'update', 'delete', 'create'), TRUE)) {
+    return FALSE;
+  }
+
+  // If no user object is supplied, the access check is for the current user.
+  if (empty($account)) {
+    $account = $GLOBALS['user'];
+  }
+
+  // Try to load the access permissions from cache.
+  $rights = &drupal_static(__FUNCTION__, array());
+  if ($babble) {
+    $cid = $babble->bid;
+  }
+  else {
+    list($entity_id) = entity_extract_ids($entity_type, $entity);
+    $cid = $babble . ':' . $entity_type . ':' . $entity_id;
+  }
+
+  // If we've already checked access for the same user, op and host- or comment
+  // entity return from cache.
+  if (isset($rights[$account->uid][$cid][$op])) {
+    return $rights[$account->uid][$cid][$op];
+  }
+
+  if ($babble) {
+    $entity = $babble->hostEntity();
+    $entity_type = $babble->hostEntityType();
+    $field_name = $babble->field_name;
+  }
+
+  // We grant access if both of the following conditions are met:
+  // - No modules say to deny access.
+  // - At least one module says to grant access.
+  $access = module_invoke_all('babble_access', $op, $babble, $field_name, $entity_type, $entity, $account);
+  if (in_array(FALSE, $access, TRUE)) {
+    $rights[$account->uid][$cid][$op] = FALSE;
+    return FALSE;
+  }
+  elseif (in_array(TRUE, $access, TRUE)) {
+    $rights[$account->uid][$cid][$op] = TRUE;
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implements hook_babble_access().
+ */
+function babble_babble_access($op, $babble = NULL, $field_name, $entity_type, $entity, $account = NULL) {
+  if (user_access('manage babbles', $account)) {
+    return TRUE;
+  }
+
+  // A user can only access comments of an entity that he is allowed to view.
+  if (!entity_access('view', $entity_type, $entity, $account)) {
+    return FALSE;
+  }
+
+  // If the comments are set to 'hidden' no operations are possible.
+  if (($access = babble_host_commenting_access($entity_type, $entity, $field_name)) == BABBLE_COMMENTS_HIDDEN) {
+    return FALSE;
+  }
+
+  // For 'create', 'update' and 'delete' operations comment access has to be set
+  // to 'open'.
+  if (in_array($op, array('create', 'update', 'delete')) && $access != BABBLE_COMMENTS_OPEN) {
+    return FALSE;
+  }
+
+  switch ($op) {
+    case 'view':
+      list(, , $entity_bundle) = entity_extract_ids($entity_type, $entity);
+      $key =  $entity_type . ':' . $entity_bundle . ':' . $field_name;
+
+      if (user_access('view babbles on ' . $key, $account)) {
+        // Some users may be allowed to view their own unpublished comments.
+        if (isset($babble) && $babble->status == BABBLE_NOT_PUBLISHED) {
+          return $account->uid == $babble->uid && user_access('view own unpublished babbles', $account) ? TRUE : FALSE;
+        }
+
+        return TRUE;
+      }
+
+      return FALSE;
+
+    case 'create':
+      list(, , $entity_bundle) = entity_extract_ids($entity_type, $entity);
+      $key =  $entity_type . ':' . $entity_bundle . ':' . $field_name;
+
+      return user_access('create babbles on ' . $key, $account) ? FALSE : TRUE;
+
+    case 'update':
+    case 'delete':
+      return $account->uid == $babble->uid && user_access($op . ' own babbles', $account) ? FALSE : TRUE;
+  }
+}
+
+/**
+ * Retrieves the current host entity configuration for comment access.
+ *
+ * @param $entity_type
+ *   The entity type of the host entity.
+ * @param $entity
+ *   The host entity.
+ * @param $field_name
+ *   The name of the comment field.
+ *
+ * @return int|bool
+ *   One of BABBLE_COMMENTS_HIDDEN, BABBLE_COMMENTS_CLOSED and
+ *   BABBLE_COMMENTS_OPEN or FALSE if the field instance does not exist or is
+ *   not of the 'babble' field type.
+ */
+function babble_host_commenting_access($entity_type, $entity, $field_name) {
+  $field = field_info_field($field_name);
+  if (!$field || $field['type'] != 'babble') {
+    return FALSE;
+  }
+
+  list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+  if (!$instance = field_info_instance($entity_type, $field_name, $bundle)) {
+    return FALSE;
+  }
+
+  if ($items = field_get_items($entity_type, $entity, $field_name)) {
+    return $items[0]['access'];
+  }
+
+  list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+  // In case the comment access has not been explicitly configured we simply
+  // load the default value from the field settings.
+  $instance = field_info_instance($entity_type, $field_name, $bundle);
+  return $instance['settings']['access'];
+}
+
+/**
+ * Helper function that builds links for an individual comment.
+ *
+ * Adds reply, edit, delete etc. depending on the current user permissions.
+ *
+ * @param $babble
+ *   The comment entity.
+ *
+ * @return
+ *   A structured array of links.
+ */
+function babble_comment_links(Babble $babble) {
+  if (babble_access('delete', $babble)) {
+    $links['comment-delete'] = array(
+      'href' => 'babble/' . $babble->bid . '/delete',
+      'title' => t('delete'),
+    );
+  }
+
+  if (babble_access('update', $babble)) {
+    $links['comment-edit'] = array(
+      'href' => 'babble/' . $babble->bid . '/edit',
+      'title' => t('edit'),
+    );
+  }
+
+  if ($babble->status == BABBLE_PUBLISHED && babble_access('create', NULL, NULL, $babble->field_name, $babble->hostEntityType(), $babble->hostEntity())) {
+    $links['comment-reply'] = array(
+      'href' => 'babble/' . $babble->bid . '/reply',
+      'title' => t('reply'),
+    );
+  }
+
+  if ($babble->status == BABBLE_NOT_PUBLISHED && user_access('manage babbles')) {
+    $links['comment-approve'] = array(
+      'href' => 'babble/' . $babble->bid . '/approve',
+      'title' => t('approve'),
+    );
+  }
+
+  drupal_alter('babble_comment_links', $links, $babble);
+
+  return $links;
+}
+
+/**
+ * Helper function that builds links for a comment host.
+ *
+ * @param $entity_type
+ *   The entity type of the host entity.
+ * @param $entity_id
+ *   The primary identifier of the host entity.
+ * @param $field_name
+ *   The name of the field that the comments run through.
+ *
+ * @return
+ *   A structured array of links.
+ */
+function babble_host_links($entity_type, $entity, $field_name) {
+  $host_access = babble_host_commenting_access($entity_type, $entity, $field_name);
+
+  $links = array();
+  if ($host_access == BABBLE_COMMENTS_OPEN) {
+    // @todo Add links for when the comments are 'open'.
+  }
+  elseif ($host_access == BABBLE_COMMENTS_CLOSED) {
+    // @todo Add links for when the comments are 'closed'.
+  }
+  elseif ($host_access == BABBLE_COMMENTS_HIDDEN) {
+    // @todo Add links for when the comments are 'hidden'.
+  }
+
+  drupal_alter('babble_host_links', $links, $babble);
+
+  return $links;
+}
+
+/**
+ * Checks whether a user is allowed to approve a comment.
+ *
+ * @param Babble $babble
+ *   The comment entity.
+ *
+ * @return bool
+ *   TRUE if the given comment is not yet approved and the given user is allowed
+ *   to do so, FALSE otherwise.
+ */
+function babble_approve_access(Babble $babble, $account = NULL) {
+  return $babble->status == BABBLE_NOT_PUBLISHED && user_access('manage babble', $account);
+}
+
+/**
+ * Wrapper for babble_access() for determining reply access for a comment
+ * entity.
+ */
+function babble_reply_access(Babble $parent, $account = NULL) {
+  return babble_access('create', NULL, $account, $parent->field_name, $parent->hostEntityType(), $parent->hostEntity());
+}
+
+/**
+ * Implements hook_babble_view_alter().
+ */
+function babble_babble_view_alter(&$build) {
+  $build['#theme'] = 'babble';
+
+  // Add contextual links, except when the entity is already being displayed
+  // on it's own page.
+  if (!empty($build['#entity']->bid) && !$build['#page']) {
+    $build['#contextual_links']['babble'] = array('babble', array($build['#entity']->bid));
+  }
+}
+
+/**
+ * Process variables for babble.tpl.php.
+ */
+function template_preprocess_babble(&$variables) {
+  $babble = $variables['elements']['#entity'];
+
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  $variables['babble'] = $babble;
+  $variables['title'] = check_plain(entity_label('babble', $babble));
+
+  $uri = entity_uri('babble', $babble);
+  $uri['options'] += array('attributes' => array('class' => 'permalink', 'rel' => 'bookmark'));
+
+  $variables['url'] = $uri ? url($uri['path'], $uri['options']) : FALSE;
+
+  if (isset($variables['elements']['#page'])) {
+    // If set by the caller, respect the page property.
+    $variables['page'] = $variables['elements']['#page'];
+  }
+  else {
+    // Else, try to automatically detect it.
+    $variables['page'] = $uri && $uri['path'] == $_GET['q'];
+  }
+
+  // Helpful $content variable for templates.
+  $variables['content'] = array();
+  foreach (element_children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+
+  // Make the field variables available with the appropriate language.
+  field_attach_preprocess('babble', $babble, $variables['content'], $variables);
+  list(, , $bundle) = entity_extract_ids('babble', $babble);
+
+  // Gather CSS classes.
+  $variables['classes_array'][] = drupal_html_class('babble-' . $bundle);
+
+  if ($babble->status == BABBLE_PUBLISHED) {
+    $variables['classes_array'][] = 'comment-published';
+  }
+  elseif ($babble->status == BABBLE_NOT_PUBLISHED) {
+    $variables['classes_array'][] = 'comment-not-published';
+  }
+
+  if (!$babble->uid) {
+    $variables['classes_array'][] = 'comment-by-anonymous';
+  }
+  elseif ($babble->uid == $variables['user']->uid) {
+    $variables['classes_array'][] = 'comment-by-viewer';
+  }
+
+  // Add RDF type and about URI.
+  if (module_exists('rdf')) {
+    $variables['attributes_array']['about'] = empty($uri['path']) ? NULL: url($uri['path']);
+    $variables['attributes_array']['typeof'] = empty($babble->rdf_mapping['rdftype']) ? NULL : $babble->rdf_mapping['rdftype'];
+  }
+
+  // Add suggestions.
+  $variables['theme_hook_suggestions'][] = 'babble';
+  $variables['theme_hook_suggestions'][] = 'babble__' . $bundle;
+  $variables['theme_hook_suggestions'][] = 'babble__' . $bundle . '__' . $variables['view_mode'];
+
+  if ($id = entity_id('babble', $babble)) {
+    $variables['theme_hook_suggestions'][] = 'babble__' . $id;
+  }
+}
+
+/**
+ * Form constructor for the babble entity form.
+ */
+function babble_form($form, $form_state, Babble $babble) {
+  $admin = empty($babble->is_new) && user_access('manage babbles') ? TRUE : FALSE;
+  $form_state['babble'] = $babble;
+
+  if ($admin) {
+    $status = isset($babble->status) ? $babble->status : BABBLE_NOT_PUBLISHED;
+    $user = user_load($babble->uid);
+
+    $form['author'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Administration'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => -10,
+    );
+
+    $form['author']['name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Authored by'),
+      '#default_value' => $user->name,
+      '#maxlength' => 60,
+      '#size' => 30,
+      '#description' => t('Leave blank for %anonymous.', array('%anonymous' => variable_get('anonymous', t('Anonymous')))),
+      '#autocomplete_path' => 'user/autocomplete',
+    );
+  }
+  else {
+    $status = user_access('skip babble approval') ? BABBLE_PUBLISHED : BABBLE_NOT_PUBLISHED;
+
+    $form['author'] = array(
+      '#weight' => -10,
+    );
+
+    $form['author']['_name'] = array(
+      '#type' => 'item',
+      '#title' => t('Your name'),
+      '#markup' => theme('username', array('account' => $GLOBALS['user'])),
+    );
+
+    $form['author']['name'] = array(
+      '#type' => 'value',
+      '#value' => $GLOBALS['user']->uid ? $GLOBALS['user']->name : '',
+    );
+  }
+
+  $form['author']['status'] = array(
+    '#type' => 'radios',
+    '#title' => t('Status'),
+    '#default_value' => $status,
+    '#options' => array(
+      BABBLE_PUBLISHED => t('Published'),
+      BABBLE_NOT_PUBLISHED => t('Not published'),
+    ),
+    '#access' => $admin,
+  );
+
+  field_attach_form('babble', $form_state['babble'], $form, $form_state, entity_language('babble', $babble));
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  $form['actions']['delete'] = array(
+    '#type' => 'submit',
+    '#value' => t('Delete'),
+    '#submit' => array('babble_form_delete_submit'),
+    '#limit_validation_errors' => array(),
+    '#access' => empty($babble->is_new) && babble_access('delete', $babble),
+  );
+
+  // Add a unique CSS identifier so we can jump to this form.
+  $form['#id'] = drupal_html_id('comment-form');
+
+  // Add some classes to ease the styling of the comment form.
+  $form['#attributes']['class'][] = drupal_html_class('comment-form');
+
+  return $form;
+}
+
+/**
+ * Form submit handler for the babble entity form.
+ */
+function babble_form_submit($form, &$form_state) {
+  $babble = $form_state['babble'];
+  entity_form_submit_build_entity('babble', $babble, $form, $form_state);
+  $babble->save();
+
+  // Explain the approval queue if necessary.
+  if ($babble->status == BABBLE_NOT_PUBLISHED) {
+    if (!user_access('manage babbles')) {
+      drupal_set_message(t('Your comment has been queued for review by site administrators and will be published after approval.'));
+    }
+
+    $uri = entity_uri('babble', $babble);
+    $form_state['redirect'] = array($uri['path'], $uri['options']);
+  }
+  else {
+    drupal_set_message(t('Your comment has been posted.'));
+
+    if ($uri = entity_uri($babble->hostEntityType(), $babble->hostEntity())) {
+      $form_state['redirect'] = array($uri['path'], $uri['options']);
+    }
+  }
+}
+
+/**
+ * Form validation handler for the babble entity form.
+ */
+function babble_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  $babble = $form_state['babble'];
+
+  if ($values['name'] && !$account = user_load_by_name($values['name'])) {
+    form_set_error('name', t('You have to specify a valid author.'));
+  }
+
+  $form_state['values']['uid'] = !empty($account) ? $account->uid : 0;
+
+  // We need the field name (bundle) for field validation.
+  $form_state['values']['field_name'] = $babble->field_name;
+
+  entity_form_field_validate('babble', $form, $form_state);
+}

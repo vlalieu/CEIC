@@ -1,0 +1,54 @@
+<?php
+/**
+ * Implements hook_context_plugins().
+ *
+ */
+function selcntrctx_context_plugins() {
+  $plugins = array();
+  $plugins['selcntrctx_context_condition_kazak'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'selcntrctx'),
+      'file' => 'selcntrctx_context_condition_kazak.inc',
+      'class' => 'selcntrctx_context_condition_kazak',
+      'parent' => 'context_condition',
+    ),
+  );
+  return $plugins;
+}
+
+
+
+/**
+ * Implements hook_context_registry().
+ *
+ */
+function selcntrctx_context_registry() {
+  return array(
+    'conditions' => array(
+      'kazak' => array(
+        'title' => t('country_selected'),
+        'description' => t('Set this context based on the value of kazak field.'),
+        'plugin' => 'selcntrctx_context_condition_kazak',
+      ),
+    ),
+  );
+}
+
+
+
+/**
+ * Implements hook_node_view().
+function selcntrctx_node_view($node, $view_mode) {
+  // Fire our context plugin when viewing nodes.
+    if ($plugin = context_get_plugin('condition', 'kazak')) {
+      $plugin->execute();
+  }
+}
+ */
+
+function selcntrctx_context_page_condition() {
+  // Load the publish plugin and see execute.
+  if ($plugin = context_get_plugin('condition', 'kazak')) {
+    $plugin->execute();
+  }
+}

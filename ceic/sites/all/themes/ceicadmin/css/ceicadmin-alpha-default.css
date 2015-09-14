@@ -1,0 +1,63 @@
+/* This file will hold styles for all layouts using the alpha grid (i.e. not the mobile layout). */
+
+.zone-menu-wrapper {
+	 background-color:#BFBFBF;
+}
+
+.tb-megamenu-menu-ceic-thematic {
+/*	background-color: #403A51;*/
+	 background-color: #bebfbe;
+}
+.zone-branding h6.site-slogan {
+	font-size:  small;
+}
+.site-slogan {
+	font-size:  small;
+}
+/* CONTENT */
+/* Frontpage */
+
+
+/* Quick Menu */
+//.tabs{ display:none;}
+.tipsy  {
+	font-size: 15px;
+}
+.quick-menu ul {
+	display: block;
+	margin-top: 10px;
+	margin-bottom: 20px;
+	/*margin-left: auto;
+	margin-right: auto;*/
+}
+.quick-menu ul li.leaf {
+	width: 80px;
+	height: 90px;
+	background-image: url('../img/bg-qm-sprite.png');
+	background-repeat: no-repeat;
+}
+
+.qm-doc-add {
+	background-position: 0 0;
+}
+.qm-doc-my {
+	background-position: -130px 0;
+}
+.qm-doc-all {
+	background-position: -260px 0;
+}
+.qm-events {
+	background-position: -390px 0;
+}
+.qm-organizations {
+	background-position: -520px 0;
+}
+.qm-activities {
+	background-position: -650px 0;
+}
+.quick-menu a {
+	display: block;
+	width: 80px;
+	height: 90px;
+	text-indent: -9999px;
+}

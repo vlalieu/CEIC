@@ -1,0 +1,16 @@
+name = Babble
+description = Provides commenting functionality for any fieldable entity.
+configure = admin/babble
+core = 7.x
+dependencies[] = entity
+
+files[] = includes/babble.entity.inc
+files[] = includes/babble.controller.inc
+files[] = includes/babble.ui.inc
+
+; Information added by drupal.org packaging script on 2013-04-07
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "babble"
+datestamp = "1365295263"
+

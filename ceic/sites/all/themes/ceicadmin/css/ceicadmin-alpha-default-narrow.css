@@ -1,0 +1,118 @@
+/* This file will hold styles that are loaded using the same media query as the narrow grid. */
+/* If you are using the default media queries provided by Omega, these styles will also
+ *  apply to the normal and widescreen layouts. You may override these styles in the normal 
+ *  and widescreen CSS files as appropriate. */
+ 
+ 
+ 
+/* Thematic Menu */
+.thematic-menu-block {
+	padding-left: 250px;
+	width: 450px;
+}
+.thematic-menu-block ul.inline li {
+	margin-right: 12px !important;
+	width: 65px;
+	height: 80px;
+}
+.thematic-menu-block a.tm-btn {
+	width: 65px;
+	font-size: 10px;
+	font-weight: normal;
+	font-style: normal;
+}
+.tm-pollution {
+	background-position: -17px 0;
+}
+.tm-invspecies {
+	background-position: -17px -100px;
+}
+.tm-emergencies {
+	background-position: -17px -200px;
+}
+.tm-biodiversity {
+	background-position: -17px -300px;
+}
+.tm-seafluctuation {
+	background-position: -17px -400px;
+}
+.tm-other {
+	background-position: -17px -500px;
+}
+
+.tm-pollution.active {
+	background-position: -417px 0;
+}
+.tm-invspecies.active {
+	background-position: -417px -100px;
+}
+.tm-emergencies.active {
+	background-position: -417px -200px;
+}
+.tm-biodiversity.active {
+	background-position: -417px -300px;
+}
+.tm-seafluctuation.active {
+	background-position: -417px -400px;
+}
+.tm-other.active {
+	background-position: -417px -500px;
+}
+.tm-pollution:hover {
+	background-position: -217px 0;
+}
+.tm-invspecies:hover {
+	background-position: -217px -100px;
+}
+.tm-emergencies:hover {
+	background-position: -217px -200px;
+}
+.tm-biodiversity:hover {
+	background-position: -217px -300px;
+}
+.tm-seafluctuation:hover {
+	background-position: -217px -400px;
+}
+.tm-other:hover {
+	background-position: -217px -500px;
+}
+
+
+/* Quick Menu */
+.quick-menu ul.menu li.leaf {
+	list-style-image: none;
+	list-style-type: none;
+	display: inline-block;
+	margin-left: 20px;
+	margin-right: 20px;
+	padding: 0;
+}
+.quick-menu ul li.leaf.first {
+	margin-left: 0px;
+}
+.quick-menu ul li.leaf.last {
+	margin-right: 0px;
+}
+
+ 
+/* Toolbox Menu */
+/* This is the default width of all vertical menus. */
+ul.nice-menu-right,
+ul.nice-menu-left,
+ul.nice-menu-right li,
+ul.nice-menu-left li {
+  width: 70px;
+}
+
+/* VERTICAL menus where submenus pop RIGHT (default). */
+ul.nice-menu-right ul {
+  width: 12.5em;
+  left: 70px;
+  top: -1px;
+}
+
+ul.nice-menu-right ul ul {
+  width: 12.5em;
+  left: 12.5em;
+  top: -1px;
+}

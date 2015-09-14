@@ -1,0 +1,107 @@
+<?php
+function synaptic_init() {
+// Insert the link and scripts in the header
+
+	  global $user;
+}
+
+function synaptic_block_info() {
+
+  $blocks['synaptik1'] = array(
+    // info: The name of the block.
+    'info' => t('synaptic'),
+  );
+
+  return $blocks;
+}
+
+function synaptic_block_view($delta = '') {
+  // The $delta parameter tells us which block is being requested.
+  switch ($delta) {
+    case 'synaptik1':
+      $block['subject'] = t('synaptic');
+      $block['content'] = drupal_get_form('synaptic_create');
+      break;
+  }
+
+  return $block;
+}
+function synaptic_create() {
+	/* mettre en commentaire cette fonction avant de modifer thought_page panel */
+/*
+  module_load_include('inc', 'node', 'node.pages'); 
+
+	$nid=arg(1);
+	$node=node_load($nid);
+	dsm($node);
+	//$comment=comment_load($node->cid);
+	//drupal_set_message('my arg' . $a3);
+	$comment = new stdClass;
+	$comment->nid = $nid;
+	$form = drupal_get_form('comment_node_thought_form', $comment);
+	//$form['author']['#title'] = 'Your Information';
+	$form['author']['#type'] = 'fieldset';
+	$form['author']['#title'] = t('Provide a comment to the cell: ' . $form['#node']->title);
+	dsm($form);
+	//$form['#action'] = t('/node/' . $nid);
+	$form['actions']['submit']['#submit'][] = 'comment_form_ls_submit';
+	return $form;
+*/
+	}
+
+	function synaptic_form_alter(&$form, &$form_state, $form_id) {
+			//dargs();
+		if ($form_id == 'search_block_form')  {  
+			}
+		if ($form_id == 'views_exposed_form')  {  
+			}
+		if ($form_id == 'comment_node_thought_form')  {  
+		if ($form['is_anonymous']['#value']) {
+			 $form['author']['#after_build'][] = 'anonymous_author_form';
+			 $form['actions']['#after_build'][] = 'anonymous_no_action';
+			} 
+		     else {
+			$form['author']['#type'] = 'fieldset';
+			$form['author']['#title'] = t('Provide a comment to : ' . $form['#node']->title);
+			$form['#node']->entity_view_prepared = FALSE;
+			$form['author']['_author']['#title'] = 'you are: ';
+			$form['author']['_author']['#markup'] = $form['author']['name']['#value'];
+			$form['comment_body']['#after_build'][] = 'configure_comment_form';
+			//$form['#node']->title = '';
+
+//			$form['actions']['submit']['#submit'][] = 'comment_form_ls_submit';
+			}
+		}
+	}
+
+	function anonymous_author_form(&$form) {
+		$aaa['name'] = array(
+		  '#type' => 'fieldset',
+		  '#title' => t('Note that only registerd users can enter comments, if you wish to regster an account, please  send an email to vlalieu2@gmail.com'),
+		  '#weight' => 5,
+		  '#collapsible' => TRUE,
+		  '#collapsed' => TRUE,
+		);
+	  	return $aaa;
+		}
+	function anonymous_no_action(&$form) {
+		$aaa['name'] = array(
+		  '#type' => 'fieldset',
+		  '#title' => t(''),
+		  '#weight' => 6,
+		  '#collapsible' => TRUE,
+		  '#collapsed' => TRUE,
+		);
+	  	return $aaa;
+		}
+	function configure_comment_form(&$form) {
+		unset($form[LANGUAGE_NONE][0]['format']);
+	  return $form;
+	}
+
+	function comment_form_ls_submit ($form, &$form_state) {
+		$nid=arg(2);
+		drupal_set_message($nid);
+		$form_state['redirect'] = t('comment/reply/' . $nid ); // Not $form_state['#redirect']
+		}
+?>

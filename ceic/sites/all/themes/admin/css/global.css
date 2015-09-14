@@ -1,0 +1,163 @@
+/* This file will hold styles for the mobile version of your website (mobile first). */
+/* This also can include ANY global CSS that applies site-wide. Unless overwritten by a more specific style rule, CSS declarations in global.css will apply site-wide. */
+
+body {
+	background: url('../img/bg.jpg') repeat-x;
+}
+/* ZONE + REGIONS */
+.region-page-top {
+}
+.zone-branding {
+	background-color: #7a706e;
+	height: 40px;
+	padding-top: 15px;
+	padding-bottom: 15px;
+	-webkit-border-top-left-radius: 6px;
+	-webkit-border-top-right-radius: 6px;
+	-moz-border-radius-topleft: 6px;
+	-moz-border-radius-topright: 6px;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+}
+.zone-branding .logo-img {
+	margin-left: 10px;
+}
+.zone-branding h6.site-slogan {
+	color: #cdc6bf;
+	font-size: 11px;
+	margin-left: 10px;
+	margin-top: 5px;
+}
+.region-user-first-inner {
+	text-align: right;
+}
+.zone-menu {
+	background: #8fd7d4;
+	height: 64px;
+	padding-top: 17px;
+	padding-bottom: 19px;
+	border-top: 1px solid #a5dfdd;
+}
+.country-selector {
+	float: left;
+	z-index: 998;
+}
+table.countryselectorfag:hover td,
+table.countryselector:hover td {
+	background: none !important;
+}
+.zone-menu .countryselectorfag,
+.zone-menu .countryselector {
+	border: none;
+	margin-bottom: 0;
+}
+.zone-menu .countryselectorfag {
+	width: 64px;
+}
+.zone-menu .countryselector {
+	width: 150px;
+}
+/*.zone-user .country-selector-txt {
+	line-height: 64px;
+	font-size: 16px;
+	color: #3f3f3f;
+	font-weight: bold;
+	margin-left: 20px;
+}*/
+#zone-content-wrapper {
+	padding-top: 0px !important;
+}
+.zone-content {
+}
+.zone-header,
+.zone-content {
+	background-color: #f6f6f6;
+}
+.zone-content {
+	-webkit-border-bottom-right-radius: 6px;
+	-webkit-border-bottom-left-radius: 6px;
+	-moz-border-radius-bottomright: 6px;
+	-moz-border-radius-bottomleft: 6px;
+	border-bottom-right-radius: 6px;
+	border-bottom-left-radius: 6px;
+}
+.region-sidebar-first {
+	background: #f6f6f6 url('../img/sidebar-first-bg.png') repeat-y right;
+	-webkit-border-bottom-left-radius: 6px;
+	-moz-border-radius-bottomleft: 6px;
+	border-bottom-left-radius: 6px;
+}
+.region-footer-second {
+	padding-top: 30px;
+	padding-bottom: 30px;
+}
+.region-footer-second-inner {
+	text-align: center;
+}
+
+
+/* ZONE BRANDING */
+.block-search-form {
+	float: right;
+}
+.block-block-3 {
+	float: right;
+}
+ul.user-top {
+	width: 80px;
+}
+ul.user-top li {
+	display: inline-block;
+	width: 34px;
+	height: 34px;
+	text-align: left;
+	text-indent: -9999px;
+	background-image: url('../img/top-btn-sprite.png');
+	background-repeat: no-repeat;
+}
+ul.user-top li a {
+	display:block;
+	width: 34px;
+	height: 34px;
+}
+.user-top-user {
+	background-position: -40px 0;
+}
+.user-top-user:hover {
+	background-position: -40px -40px;
+}
+.user-top-logout {
+	width: 34px;
+	height: 34px;
+	background-position: -80px 0;
+	text-indent: -9999px;
+}
+.user-top-logout:hover {
+	background-position: -80px -40px;
+}
+
+
+
+/* NAVIGATION SYSTEMS */
+
+/* Thematic Superfish Menu */
+.thematic-menu {
+	float: left;
+}
+
+
+
+/* MISC */
+/* Magnific Popup */
+.mfp-content #skip-link,
+.mfp-content .region-page-top {
+	display: none;
+}
+.mfp-content #popup-content {
+  position: relative;
+  background: #FFF;
+  padding: 20px;
+  width: auto;
+  max-width: 620px;
+  margin: 20px auto;
+}

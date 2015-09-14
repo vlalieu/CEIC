@@ -1,0 +1,362 @@
+<?php
+/*
+function computed_field_field_listdocu_compute(&$entity_field, $entity_type, $entity, $field, $instance, $langcode, $items)	{
+$repertoire = array_pop(array_pop(field_get_items($entity_type, $entity, 'field_iframe_url')));
+dsm($field);
+drupal_set_message('<pre>' . $repertoire . '</pre>');
+$entity_field[0]['value'] = $repertoire;
+	}
+*/
+function computed_field_user_login(&$edit, $account) {
+global $user;
+
+foreach ($user->roles as $role) {
+        switch($role) {
+        case "Azerbaijan":
+                $country='azerbaijan';
+                $_SESSION['selected_country']['#value']=41;
+                break;
+        case "Iran":
+                $country='iran';
+                $_SESSION['selected_country']['#value']=42;
+                break;
+        case "Kazakhstan":
+                $country='kazakhstan';
+                $_SESSION['selected_country']['#value']=40;
+                break;
+        case "Russia":
+                $country='russia';
+                $_SESSION['selected_country']['#value']=39;
+        break;
+        case "Region":
+                $country='region';
+                $_SESSION['selected_country']['#value']=9211;
+                break;
+        case "Turkmenistan":
+                $country='turkmenistan';
+                $_SESSION['selected_country']['#value']=43;
+                break;
+        default:
+                break;
+                }
+
+	}
+}
+
+function  computed_field_field_event_folder_compute(&$entity_field, $entity_type, $entity, $field, $instance, $langcode, $items) {
+
+//*** Get the country for the curent user
+              $country_id=0;
+global $user;
+foreach ($user->roles as $role) {
+        switch($role) {
+        case "Azerbaijan":
+		$country='azerbaijan';
+                $country_id=41;
+                break;
+        case "Iran":
+		$country='iran';
+                $country_id=42;
+                break;
+        case "Kazakhstan":
+		$country='kazakhstan';
+                $country_id=40;
+                break;
+        case "Russia":
+		$country='russia';
+                $country_id=39;
+        break;
+        case "Region":
+		$country='region';
+                $country_id=9211;
+                break;
+        case "Turkmenistan":
+                $country='turkmenistan';
+                $country_id=43;
+                break;
+        default:
+                break;
+                }
+        }
+drupal_set_message('<pre>' . $country . '</pre>'); 
+//*** build folder name: year-month-title
+//$orgid=array_pop(array_pop(field_get_items($entity_type, $entity, 'field_leadingorganization')));
+
+// get the title
+$meeting_title = str_replace(' ', '_', $entity->title);
+//drupal_set_message('<pre>' . print_r(print_r($node)) . '</pre>');
+//drupal_set_message('<pre>' . $meeting_title . '</pre>'); 
+$meeting_date = explode(" ",$entity->field_evt_date['und'][0]['value']);
+
+
+//*** create the folder under /home/country/meetings/
+
+$myfolder='/home/'.$country.'/events/'.'_' . $meeting_date[0] . '_' . $meeting_title;
+shell_exec ('mkdir -p ' . $myfolder);
+$myfolderurl='http://www.kaspinfo.com/kic/desktop/'.$country.'/events/'.'_' . $meeting_date[0] . '_' . $meeting_title;
+drupal_set_message('<pre>The folder ' . $myfolderurl . ' is created. you can share all the files related to the event (list of participants, agenda, ppt presentations, etc.</pre>'); 
+$entity_field[0]['value']=$myfolderurl;
+}
+function org_listing_after_build(&$form_element, &$form_state) {
+	$country_id = $_SESSION['selected_country']['#value'];
+	unset($form_element['und']['#options']);
+	$tidar = array(':cid' => $country_id);
+	$result = db_query('select org.entity_id , field_name_organization_en_value FROM {field_data_field_name_organization_en} AS org , {field_data_field_cep_org_country} AS pays WHERE pays.entity_id = org.entity_id AND pays.field_cep_org_country_nid = :cid', $tidar);
+	foreach ($result as $record) {
+		//drupal_set_message('<pre>' . $record->entity_id . ' ' . $record->field_name_organization_en_value . '</pre>');
+		$form_element['und']['#options'][$record->entity_id] = $record->field_name_organization_en_value;	
+		}
+ return $form_element;
+}
+
+function funding_orgs_after_build(&$form_element, &$form_state) {
+        unset($form_element['und']['#options']);
+        $result = db_query("select org.entity_id , field_name_organization_en_value FROM {field_data_field_name_organization_en} AS org , {field_data_field_type_en} AS typorg WHERE typorg.entity_id = org.entity_id AND typorg.field_type_en_value = 'donnor'");
+        foreach ($result as $record) {
+                //drupal_set_message('<pre>' . $record->entity_id . ' ' . $record->field_name_organization_en_value . '</pre>');
+                $form_element['und']['#options'][$record->entity_id] = $record->field_name_organization_en_value;
+                }
+ return $form_element;
+}
+
+/**
+ */
+function computed_field_field_lead_org_compute(&$entity_field, $entity_type, $entity, $field, $instance, $langcode, $items)	{
+	//dsm($entity);
+	$orgid=array_pop(array_pop(field_get_items($entity_type, $entity, 'field_leading_organization')));
+	if ($orgid != '') {
+		$tidar = array(':eid' => $orgid);
+		$result = db_query('select field_name_organization_en_value FROM {field_data_field_name_organization_en} AS org WHERE org.entity_id = :eid', $tidar);
+		$entity_field[0]['value']=$result->fetchField();
+	}
+}
+function computed_field_field_evt_lead_org_compute(&$entity_field, $entity_type, $entity, $field, $instance, $langcode, $items)     {
+
+	$orgid1=$entity->field_evt_sel_org['und'][0]['nid'];
+        if ($orgid1 != '') {
+                $orgar = array(':oid' => $orgid1);
+                $result = db_query('select field_name_organization_en_value FROM {field_data_field_name_organization_en} AS org WHERE org.entity_id = :oid', $orgar);
+                $entity_field[0]['value']=$result->fetchField();
+        }
+}
+
+function computed_field_field_funding_org_comp_compute (&$entity_field, $entity_type, $entity, $field, $instance, $langcode, $items)     {
+	$orglist=$entity->field_fundingagencies['und'];
+	$orgvect = array();
+        if ($orglist) {
+	foreach ($orglist as $org) {
+		array_push($orgvect,$org['nid']);
+		}
+  $query = db_select('field_data_field_name_organization_en', 'org')
+                ->fields('org', array('field_name_organization_en_value',))
+                ->condition('org.entity_id',  $orgvect,'IN'); 
+	    $results = $query->execute();
+//drupal_set_message('<pre>' . $query->__toString()  . '</pre>');
+
+                $listorgs = "";
+                foreach ($results as $record) {
+                //drupal_set_message('<pre>' . $record->field_name_organization_en_value . '</pre>');
+                $listorgs .= $record->field_name_organization_en_value . ' # ';
+                }
+ 
+                $entity_field[0]['value']=$listorgs;
+        }
+}
+function computed_field_field_particip_org_comp_compute(&$entity_field, $entity_type, $entity, $field, $instance, $langcode, $items) {
+//drupal_set_message('<pre>' . 'hello'  . '</pre>');
+
+        $orglist=$entity->field_participatingorganizations['und'];
+        $orgvect = array();
+        if ($orglist) {
+        foreach ($orglist as $org) {
+                array_push($orgvect,$org['nid']);
+//drupal_set_message('<pre>' . $orgvect,$org['nid'] . '</pre>');
+                }
+  $query = db_select('field_data_field_name_organization_en', 'org')
+                ->fields('org', array('field_name_organization_en_value',))
+                ->condition('org.entity_id',  $orgvect,'IN');
+            $results = $query->execute();
+//drupal_set_message('<pre>' . $query->__toString()  . '</pre>');
+
+                $listorgs = "";
+                foreach ($results as $record) {
+                //drupal_set_message('<pre>' . $record->field_name_organization_en_value . '</pre>');
+                $listorgs .= $record->field_name_organization_en_value . ' # ';
+                }
+
+                $entity_field[0]['value']=$listorgs;
+        }
+}
+ 
+/*--
+function computed_field_field_funding_org_comp_display($field, $entity_field_item, $entity_lang, $langcode) {
+$display_output = $entity_field_item['value'];
+}
+--*/
+
+/* display function *?
+function computed_field_field_leading_org_display()	{
+$display_output = $entity_field_item['value'];
+//$display_output = "aaa";
+}
+
+*/
+function ceicfields_form_alter(&$form, &$form_state, $form_id) {
+	// in order to hide the display of the Title : (22 Nov 2012)
+//$form['title']['#type'] = 'hidden';
+
+//dsm($form);
+//drupal_set_message('<pre> devel info: this is the form_id: ' . $form_id . '</pre>');
+// valeur par default sur le view projects
+        if ($form_id == "search_block_form") {
+//dsm(array_keys(get_defined_vars()));
+//dsm($form);
+$form['search_block_form']['#title'] = t('Search');
+	}
+
+
+	if ($form_id == "user_login_block") {
+$form['links'] = Null; // Remove Request New Password and other links from Block form
+//$form['links']['#markup'] = t('Not Registerd?') . ' <a href="/user/register">' . t('Create Account') . '</a>'; // Remove Request New Password from Block form
+//$form['links']['#markup'] = ' <a href="/user/register">' . t('Create Account') . '</a>'; // Remove Request New Password from Block form
+$form['name']['#title'] = t("User name"); // Change text on form
+}
+//_sheetnode_phpexcel_import_form
+            switch ($form_id)       {
+                        case '_sheetnode_phpexcel_import_form':
+				$form['import']['#title']=t('Select the Excel (xls) file to be imported');
+				$form['submit']['#value']=t('Import Excel Sheets');
+				break;
+			case 'datasource_node_form':
+				$form['#after_build'][] = 'custom_after_build';
+			        $form['revision_information']['#access'] = FALSE;
+       				$form['options']['#access'] = FALSE;
+				break;
+                        default:
+                                break;
+	}
+
+if (($form_id == 'article_node_form') || ($form_id == 'event_node_form')  || ($form_id == 'gis_object_form') || ($form_id == 'sheetnode_node_form') ) {
+//* if edit the first time then set the default country goup and audience
+	$form['#after_build'][] = 'custom_after_build';
+	if ($form['nid']['#value'] == NULL) {
+ 	//	$form['group_audience']['#after_build'] = array('group_audience_after_build');
+	// set the name of the country check_box	
+		switch ($form_id)	{
+			case 'article_node_form':
+				$form['field_ref_country']['#after_build'] = array('country_checkebox_after_build');
+				//$form['title']['#title'] = t("Enter a short title for this article"); // Change text on form
+				break;
+			case  'sheetnode_node_form':
+				$form['field_sheet_country']['#after_build'] = array('country_checkebox_after_build');
+                                break;
+			default:
+				break;
+			}
+	}
+	$form['revision_information']['#access'] = FALSE;
+	$form['options']['#access'] = FALSE;
+
+  }
+		switch ($form_id)	{
+			case 'cep_project_node_form':
+				$list_orgs=array('org_listing_after_build');
+				$funding_orgs=array('funding_orgs_after_build');
+				$form['field_leading_organization']['#after_build'] = $list_orgs;
+				$form['field_fundingagencies']['#after_build'] = $funding_orgs;
+				$form['field_participatingorganizations']['#after_build'] = $list_orgs;
+				$form['#after_build'][] = 'custom_after_build';
+				$form['revision_information']['#access'] = FALSE;
+	       			$form['options']['#access'] = FALSE;
+			break;
+			case 'event_node_form':
+				$list_orgs=array('org_listing_after_build');
+				$form['field_evt_sel_org']['#after_build'] = $list_orgs;
+			break;
+
+			case 'user_register_form':
+				$list_orgs=array('org_listing_after_build');
+				$form['field_codeorg']['#after_build'] = $list_orgs;
+				//$form['field_cep_orgnization']['#after_build'] = $list_orgs;
+			break;
+			default:
+			break;
+			}
+}
+
+function custom_after_build($form, &$form_state) {
+		$form['path']['#access'] = FALSE;
+		$form['comment_settings']['#access'] = FALSE;
+		$form['author']['#access'] = FALSE;
+	$form['menu']['#access'] = FALSE;
+	return ($form);	
+}
+function country_checkebox_after_build(&$form_element, &$form_state) {
+  // Have a look at the element with devel's dsm
+
+$country_id=0;
+global $user;
+foreach ($user->roles as $role) {
+	switch($role) {
+	case "Azerbaijan":
+		$country_id=41;
+		break;
+	case "Iran":
+		$country_id=42;
+		break;
+	case "Kazakhstan":
+		$country_id=40;
+		break;
+	case "Russia":
+		$country_id=39;
+	break;
+	case "Turkmenistan":
+		$country_id=43;
+		break;
+        case "Region":
+                $country_id=9211;
+                break;
+	default:
+		break;
+		}
+	}
+ $form_element['und'][$country_id]['#value'] = 1;
+ $form_element['und'][$country_id]['#checked'] = TRUE;
+
+  // Code to adjust your form element here...
+ return $form_element;
+}
+function group_audience_after_build(&$form_element, &$form_state) {
+            $gid=0;
+global $user;
+foreach ($user->roles as $role) {
+        switch($role) {
+        case "Azerbaijan":
+                $gid=6;
+                break;
+        case "Iran":
+                $gid=7;
+                break;
+        case "Kazakhstan":
+                $gid=5;
+                break;
+        case "Russia":
+                $gid=4;
+        break;
+        case "Turkmenistan":
+                $gid=8;
+                break;
+        case "Region":
+                $gid=11;
+                break;
+        default:
+                break;
+                }
+        }
+
+ $form_element['und']['#value'] = $gid;
+  // Code to adjust your form element here...
+ return $form_element;
+}
+
+?>

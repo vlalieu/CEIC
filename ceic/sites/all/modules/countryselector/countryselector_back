@@ -1,0 +1,586 @@
+<?php
+function countryselector_init() {
+	    global $user;
+	    drupal_add_js('misc/ajax.js');
+	if(!isset($_SESSION['is_coordinator']['#value'])) {
+		    $_SESSION['is_coordinator'] = array();
+		    $_SESSION['is_coordinator']['#value'] = FALSE;
+		}
+	
+	     //if coordinator -> enable country switcher (that will switch the country group membership of the user)
+		foreach ($user->roles as $role) {
+				switch($role) {
+					case 'coordinator':
+						$_SESSION['is_coordinator']['#value'] = TRUE;
+					break;
+					default:
+					break;
+				}
+			}
+// role coordinaator - end
+
+	    $_SESSION['selected_country'] = array();
+            $_SESSION['selected_country']['#value'] = 47;
+            $_SESSION['selected_country']['#name'] = 'Region';
+		$groups = og_get_groups_by_user($user);
+	    if($groups != NULL) {
+		$grp0=$groups['node'];
+		foreach ($grp0 as $groupe) {
+			switch($groupe) {
+			case 43:
+				$_SESSION['selected_country']['#value'] = 43;
+				$_SESSION['selected_country']['#name'] = 'Azerbaijan';
+				break;
+			case 44:
+				$_SESSION['selected_country']['#value'] = 44;
+				$_SESSION['selected_country']['#name'] = 'Iran';
+				break;
+			case 45:
+				$_SESSION['selected_country']['#value'] = 45;
+				$_SESSION['selected_country']['#name'] = 'Kazakhstan';
+				break;
+			case 42:
+				$_SESSION['selected_country']['#value'] = 42;
+				$_SESSION['selected_country']['#name'] = 'Russia';
+			break;
+			case 46:
+				$_SESSION['selected_country']['#value'] = 46;
+				$_SESSION['selected_country']['#name'] = 'Turkmenistan';
+				break;
+                        case 47:
+                                $_SESSION['selected_country']['#value'] = 47;
+				$_SESSION['selected_country']['#name'] = 'Region';
+                                break;
+			}
+		}
+		//highlight_content($_SESSION['selected_country']['#value']);
+	   }
+}
+
+
+	function highlight_content ($cid)	{
+			$country='xxxx';
+                        switch($cid) {
+                        case 43:
+                                $country = 'Azerbaijan';
+                                break;
+                        case 44:
+                                $country = 'Iran';
+                                break;
+                        case 45:
+                                $country = 'Kazakhstan';
+                                break;
+                        case 42:
+                                $country = 'Russia';
+                        break;
+                        case 46:
+                                $country = 'Turkmenistan';
+                                break;
+                        case 47:
+                                $country = 'Region';
+                                break;
+			}
+
+			// execute query
+			/**
+			$sql = "SELECT DISTINCT(t.field_thematique_tid , p.field_pays_value) ";
+			$sql .= "FROM node n, field_data_field_thematique t , field_data_field_pays p ";
+			$sql .= "WHERE n.type='document' AND t.entity_id=n.nid AND p.entity_id=n.nid ";
+			**/
+			require_once("./includes/bootstrap.inc");
+			drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+			$query = db_select('node', 'n')
+					->condition('type', 'document','=');
+			//$query = db_select('field_data_field_thematique', 't');
+			$query->join('field_data_field_thematique', 't', 'n.nid = t.entity_id');
+			$query->join('field_data_field_pays', 'p', 'n.nid = p.entity_id');
+			$query->condition('p.field_pays_value', $country, '=');
+			//$query->fields('n',array('title','nid')) 
+			   $query->fields('t',array('field_thematique_tid'))
+			 ->fields('p',array('field_pays_value'))->distinct();
+
+			$result = $query->execute();
+			// set the Ajax command
+			$commands = array();
+			    while($record = $result->fetchAssoc()) {
+				//drupal_set_message($record['field_thematique_tid']);				
+				$commands[] = ajax_command_css('a[href*="term"]/' + $record['field_thematique_tid'], array('background-color' => '#BEBBCE','font-weight' => 'bold'));
+    			}
+			return ($command);
+		}
+
+// function to changhe the group membership
+	function group_membership($type, $gid, $uid)	{
+	  $group_type = 'node'; //All our/my groups are of type node
+	  $entity_type = 'user'; //All our/my members are type users
+	  $values = array(
+	    'entity_type' => 'user',
+	    'entity' => $uid,
+	    'field_name' => FALSE,
+	    'state' => 1,
+	  );
+	  $return = FALSE;
+
+	    switch ($type){
+		case 'subscribe':
+		  $values['state'] = 2;
+		  og_group($group_type, $gid, $values);
+		$return = 'SUBSCRIBED TO TEAM';
+		  break;
+	      case  'approve':
+		  $values['state'] = 1;
+		  og_group($group_type, $gid, $values);
+		$return = 'APPROVED TO TEAM';
+		break;
+	      case 'delete':
+		og_ungroup($group_type, $gid, $entity_type, $uid);
+		$return = 'REMOVED FROM TEAM';
+		break;
+	      default:
+		$return = 'FALSE TYPE';
+		break;
+	    }
+
+//	  drupal_set_message( json_encode($return)); 
+	}
+	// The Node Form Alter example needs to be in another file.
+	module_load_include('inc', 'countryselector', 'countryselector_node_form_alter.inc');
+
+	/**$_SESSION['selected_country'] = array();
+	 * AJAX-enabled select element causes replacement of a set of checkboxes
+	 * based on the selection.
+	 */
+	function countryselector_autocheckboxes($form, &$form_state) {
+	  // Since the form builder is called after every AJAX request, we rebuild
+	  // the form based on $form_state.
+	  
+		if(isset($_SESSION['selected_country']['#value'])) {
+
+			 $country_id = !empty($form_state['values']['country_select']) ? $form_state['values']['country_select'] : $_SESSION['selected_country']['#value'];
+		}
+		else {
+			$country_id=9211;
+		}
+
+
+	  $form['tab_start'] = array(
+	    '#prefix' => '<table class="countryselector">',
+	  );
+
+	  $form['current_country'] = array(
+	    //'#title' => 'tout le forme est mis en commentaire :) ',
+	    // The prefix/suffix provide the div that we're replacing, named by
+	    // #ajax['wrapper'] above.
+	   // ajax recgnize any tag with id=checkbox-div not only div tags :)
+	    '#prefix' => '<td id="checkboxes-div" class="countryselectorfag">',
+	    '#markup' => '<img alt src="http://www.vlkey.com/ceic/sites/default/files/smallcntr' . $country_id . '.png">',
+	    '#suffix' => '</td>',
+	  );
+		if ($_SESSION['is_coordinator']['#value']) {
+			  $form['country_select'] = array(
+			    '#type' => 'select',
+			    '#options' => array(47 => 'Region', 43 => 'Azerbaijan' , 44 => 'Iran', 45 => 'Kazakhstan', 42 => 'Russia' , 46 => 'Turkmenistan'),
+			    '#default_value' => $country_id,
+			    '#ajax' => array(
+			      'callback' => 'countryselector_autocheckboxes_callback',
+			      'wrapper' => 'checkboxes-div',
+			      'progress' => array('type' => 'none'),
+			    ),
+			    '#prefix' => '<td class="countryselector">',
+			    '#suffix' => '</td>',
+			  );
+
+		}
+		else {
+			  $form['country_select'] = array(
+				    '#type' => 'fieldset',
+				    '#title' => $_SESSION['selected_country']['#name'], 
+				    '#prefix' => '<td class="countryselector">',
+				    '#suffix' => '</td>',
+				 );
+			}
+
+	  $form['tab_end'] = array(
+	    '#prefix' => '</table>',
+	  );
+		return $form;
+	}
+
+	/**
+	 * Callback element needs only select the portion of the form to be updated.
+	 * Since #ajax['callback'] return can be HTML or a renderable array (or an
+	 * array of commands), we can just return a piece of the form.
+	 * See @link countryselector_advanced.inc AJAX Advanced Commands for more details
+	 * on AJAX framework commands.
+	 *
+	 * @return renderable array (the checkboxes fieldset)
+	 */
+	function countryselector_autocheckboxes_callback($form, $form_state) {
+		dsm($form);
+		// ici on va chanher le groupe country  du coordinateur
+		global $user;
+		
+		$uid=$user->uid;
+
+		$tmpstr=group_membership('delete',$_SESSION['selected_country']['#value'], $uid);
+		$tmpstr=group_membership('subscribe',$form['country_select']['#value'], $uid);
+		$tmpstr=group_membership('approve',$form['country_select']['#value'], $uid);
+		$_SESSION['selected_country']['#value']  =  $form['country_select']['#value'];
+		$command=highlight_content($form['country_select']['#value']);
+	        $page = array('#type' => 'ajax', '#commands' => $commands);
+	        //ajax_deliver($page);
+
+	return $form['current_country'];
+	}
+
+	function countryselector_block_info() {    
+	  $blocks['countryselectorblk'] = array(
+	    // info: The name of the block.
+	    'info' => t('countryselector'),
+	  );
+
+	  return $blocks;
+	}
+	function countryselector_block_view($delta = '') {
+	  // The $delta parameter tells us which block is being requested.
+	  switch ($delta) {
+	    case 'countryselectorblk':
+	      // Create your block content here
+	      $block['subject'] = t('Country selector');
+	      $block['content'] = drupal_get_form('countryselector_autocheckboxes');
+	      break;
+	  }
+
+	  return $block;
+	}
+	/**
+	 * @} End of "defgroup countryselector".
+	 */
+
+
+
+	function countryselector_searchdocs($form, &$form_state) {
+	  $search_string = !empty($form_state['values']['docs_search']) ? $form_state['values']['docs_search'] : '';
+
+
+	  $form['sd_dir_sel'] = array(
+	    '#type' => 'select',
+	    '#title' => t('folder'),
+	    '#options' => array('general_information' => 'general_information' ,
+			'alien_species' => 'alien_species',
+			'capacity_building' => 'capacity_building',
+			'coastal_zone_management' => 'coastal_zone_management',
+			'country_overview' => 'country_overview',
+			'databases' => 'databases',
+			'env_impact_assess' => 'env_impact_assess',
+			'environmental_emergencies' => 'environmental_emergencies',
+			'legal_instruments' => 'legal_instruments',
+			'monitoring' => 'monitoring',
+			'pollution' => 'pollution',
+			'pollution/dumping' => 'pollution/dumping',
+			'pollution/land_based_sources' => 'pollution/land_based_sources',
+			'pollution/other' => 'pollution/other',
+			'pollution/seabed_activities' => 'pollution/seabed_activities',
+			'pollution/vessels' => 'pollution/vessels',
+			'projects' => 'projects',
+			'projects/grant' => 'projects/grant',
+			'biodiversity' => 'biodiversity',
+			'public_participation' => 'public_participation',
+			'research_developmt' => 'research_developmt',
+			'sea_fluctuation' => 'sea_fluctuation',),
+	    '#default_value' => '',
+	    '#prefix' => '<TABLE><TR><TH>',
+	    '#suffix' => '</TH>',
+	  );
+
+	// ici ajouter un check box Caspeco Uploaded All
+	// #VL121109
+	  $form['sd_file_sel'] = array(
+	    '#type' => 'select',
+	    '#title' => t('origin of file'),
+	    '#options' => array('-' => 'Uploaded' , 'l' => 'Caspeco',),
+	    '#default_value' => 'l',
+	    '#prefix' => '<TH>',
+	    '#suffix' => '</TH>',
+	  );
+
+	  $form['docs_search'] = array(
+	    '#title' => t('search string'),
+	    '#type' => 'textfield',
+	    '#prefix' => '<TH>',
+	    '#suffix' => '</TH>',
+	    '#size'=> 32,
+	    '#default_value' => $search_string,
+	  );
+
+	  $form['docsearch_submit'] = array(
+	    '#type' => 'submit',
+	    '#prefix' => '<TH>',
+	    '#suffix' => '</TH></TR></TABLE>',
+	    '#ajax' => array(
+	      'callback' => 'search_submit_callback',
+	      'wrapper' => 'result_box',
+	      'name' => 'submit421',
+	    ),
+	    '#value' => t('Search'),
+	  );
+
+	  $form['result_box'] = array(
+	    '#type' => 'markup',
+	    '#markup' => '<TABLE id="result_box"><TR><TD>search results</TD></TR></TABLE>',
+	  );
+
+
+
+	  return $form;
+	}
+
+	function search_submit_callback($form, $form_state) {
+	//dsm($form);
+	  switch($_SESSION['selected_country']['#value']) {
+		case 43:
+			$country='azerbaijan';
+			break;
+		case 44:
+			$country='iran';
+			break;
+		case 45:
+			$country='kazakhstan';
+			break;
+		case 42:
+			$country='russia';
+			break;
+		case 46:
+			$country='turkmenistan';
+			break;
+		case 47:
+			$country='region';
+			break;
+		}
+	  $element = $form['result_box'];
+	  $sstr=urlencode($form['docs_search']['#value']);
+	  if (strlen($sstr) < 3) $sstr = 'nixberniks';
+	//drupal_set_message('<pre>' . '/var/www/ceic/sites/all/modules/countryselector/insidefilesearch.sh ' . ' ' . $form['sd_file_sel']['#value'] . ' ' . $country  . ' ' .  $sstr . ' ' . $form['sd_dir_sel']['#value'] . '</pre>');
+	  $element['#markup'] = '<TABLE id="result_box">' . shell_exec('/var/www/ceic/sites/all/modules/countryselector/insidefilesearch.sh ' . ' ' . $form['sd_file_sel']['#value'] . ' ' . $country  . ' ' .  $sstr . ' ' . $form['sd_dir_sel']['#value'])  .'</TABLE>';
+	  return $element;
+	}
+
+
+	function countryselector_makefolder($form, &$form_state) {
+	  $new_folder = !empty($form_state['values']['new_folder_name']) ? $form_state['values']['new_folder_name'] : '';
+
+
+	  $form['base_folder'] = array(
+	    '#type' => 'select',
+	    '#title' => t('base folder'),
+	    '#options' => array('general_information' => 'general_information' ,
+			'alien_species' => 'alien_species',
+			'capacity_building' => 'capacity_building',
+			'coastal_zone_management' => 'coastal_zone_management',
+			'country_overview' => 'country_overview',
+			'databases' => 'databases',
+			'env_impact_assess' => 'env_impact_assess',
+			'environmental_emergencies' => 'environmental_emergencies',
+			'legal_instruments' => 'legal_instruments',
+			'monitoring' => 'monitoring',
+			'pollution' => 'pollution',
+			'pollution/dumping' => 'pollution/dumping',
+			'pollution/land_based_sources' => 'pollution/land_based_sources',
+			'pollution/other' => 'pollution/other',
+			'pollution/seabed_activities' => 'pollution/seabed_activities',
+			'pollution/vessels' => 'pollution/vessels',
+			'projects' => 'projects',
+			'projects/grant' => 'projects/grant',
+			'biodiversity' => 'biodiversity',
+			'public_participation' => 'public_participation',
+			'research_developmt' => 'research_developmt',
+			'sea_fluctuation' => 'sea_fluctuation',),
+	    '#default_value' => '',
+	    '#prefix' => '<TABLE><TR><TH>',
+	    '#suffix' => '</TH>',
+	  );
+
+	  $form['new_folder_name'] = array(
+	    '#title' => t('new folder name (in latine characters, without spacing)'),
+	    '#type' => 'textfield',
+	    '#prefix' => '<TH>',
+	    '#suffix' => '</TH>',
+	    '#size'=> 32,
+	    '#default_value' => $new_folder,
+	  );
+
+	  $form['mkfolder_submit'] = array(
+	    '#type' => 'submit',
+	    '#prefix' => '<TH>',
+	    '#suffix' => '</TH></TR></TABLE>',
+	    '#ajax' => array(
+	      'callback' => 'make_folder_callback',
+	      'wrapper' => 'folder_box',
+	      'name' => 'submit422',
+	    ),
+	    '#value' => t('Create folder'),
+	  );
+
+	  $form['folder_box'] = array(
+	    '#type' => 'markup',
+	    '#markup' => '<TABLE id="folder_box"><TR><TD>create folder tool</TD></TR></TABLE>',
+	  );
+
+	  return $form;
+	}
+
+	function make_folder_callback($form, $form_state) {
+	  switch($_SESSION['selected_country']['#value']) {
+		case 41:
+			$country='azerbaijan';
+			break;
+		case 42:
+			$country='iran';
+			break;
+		case 40:
+			$country='kazakhstan';
+			break;
+		case 39:
+			$country='russia';
+			break;
+		case 43:
+			$country='azerbaijan';
+			break;
+		case 9211:
+			$country='region';
+			break;
+		}
+	  $element = $form['folder_box'];
+	  $sstr=urlencode($form['new_folder_name']['#value']);
+	  if (strlen($sstr) > 3) {
+		$myfolder='/home/'.$country. '/sections/' . $form['base_folder']['#value'] . '/' .  $sstr  ;
+		drupal_set_message('<pre> creating ' . $myfolder . '</pre>');	
+		shell_exec ('mkdir -p ' . $myfolder);
+		shell_exec ('chown  ' . $country . ' ' . $myfolder);
+		shell_exec ('chgrp  www-data ' . $myfolder);
+		shell_exec ('chmod  g+rwx ' . $myfolder);
+		
+		$element['#markup'] = '<TABLE id="folder_box"> <td> the folder: ' . $myfolder . ' is created</td></TABLE>';
+		}
+		else 	{
+			drupal_set_message('<pre> the folder name must be bigger than 3 characters in latine characters without space</pre>');
+			$element['#markup'] = '<TABLE id="folder_box"> <td> the folder: ' . $myfolder . ' is created</td></TABLE>';		
+		  }
+	  
+	  return $element;
+	}
+
+	/**
+		function for creation of a link to a file
+	*/
+	function countryselector_makelink($form, &$form_state) {
+	  $new_link = !empty($form_state['values']['link_name']) ? $form_state['values']['link_name'] : '';
+
+	  $form['link_target'] = array(
+	    '#title' => t('2) Paste the link in the target link box below'),
+	    '#type' => 'textfield',
+	    '#prefix' => '<TH><a href=http://www.vlkey.com/ceic/desktop/russia/sections/ target=_new>1)  Copy the link to target file</a><br>
+	    (<i> In the Directory tab, select the file, right click to copy the link address</i>)</th><th>',
+	    '#suffix' => '</TH>',
+	    '#maxlength' => 255,
+	    '#size'=> 132,
+	    '#default_value' => '',
+	  );
+
+
+	  $form['link_folder'] = array(
+	    '#type' => 'select',
+	    '#title' => t('3) Select the link folder'),
+	    '#options' => array('general_information' => 'general_information',
+			'alien_species' => 'alien_species',
+			'capacity_building' => 'capacity_building',
+			'coastal_zone_management' => 'coastal_zone_management',
+			'country_overview' => 'country_overview',
+			'databases' => 'databases',
+			'env_impact_assess' => 'env_impact_assess',
+			'environmental_emergencies' => 'environmental_emergencies',
+			'legal_instruments' => 'legal_instruments',
+			'monitoring' => 'monitoring',
+			'pollution' => 'pollution',
+			'pollution/dumping' => 'pollution/dumping',
+			'pollution/land_based_sources' => 'pollution/land_based_sources',
+			'pollution/other' => 'pollution/other',
+			'pollution/seabed_activities' => 'pollution/seabed_activities',
+			'pollution/vessels' => 'pollution/vessels',
+			'projects' => 'projects',
+			'projects/grant' => 'projects/grant',
+			'biodiversity' => 'biodiversity',
+			'public_participation' => 'public_participation',
+			'research_developmt' => 'research_developmt',
+			'sea_fluctuation' => 'sea_fluctuation',),
+	    '#default_value' => '',
+	    '#prefix' => '<TABLE><TR><TH>',
+	    '#suffix' => '</TH>',
+	  );
+
+	  $form['makelink_submit'] = array(
+	    '#type' => 'submit',
+	    '#prefix' => '<TH>',
+	    '#suffix' => '</TH></TR></TABLE>',
+	    '#ajax' => array(
+	      'callback' => 'makelink_callback',
+	      'wrapper' => 'link_box',
+	      'name' => 'submit422',
+	    ),
+	    '#value' => t('4) Press on Create link'),
+	  );
+
+	  $form['link_box'] = array(
+	    '#type' => 'markup',
+	    '#markup' => '<TABLE id="link_box"><TR><TD>create a link tool</TD></TR></TABLE>',
+	  );
+
+	  return $form;
+	}
+
+	function makelink_callback($form, $form_state) {
+		//dsm($form);
+	  switch($_SESSION['selected_country']['#value']) {
+		case 41:
+			$country='azerbaijan';
+			break;
+		case 42:
+			$country='iran';
+			break;
+		case 40:
+			$country='kazakhstan';
+			break;
+		case 39:
+			$country='russia';
+			break;
+		case 43:
+			$country='azerbaijan';
+			break;
+		case 9211:
+			$country='region';
+			break;
+		}
+	  $element = $form['link_box'];
+	  $lpos = strrpos($form['link_target']['#value'], '/');
+	  if (lpos) $lstr = substr($form['link_target']['#value'], $lpos);
+	  if (strlen($lstr) > 3) {
+		$link='/home/'.$country. '/sections/' . $form['link_folder']['#value'] .  $lstr  ;
+		//drupal_set_message('<pre> link ' . $link . '</pre>');	
+		$xx = strrpos($form['link_target']['#value'], '/' . $country . '/');
+		$target = substr($form['link_target']['#value'], $xx);
+		$target = '/home' . $target;
+		//drupal_set_message('<pre> target ' . $target . '</pre>');
+		$linkhttpd= 'desktop/'.$country. '/sections/' . $form['link_folder']['#value'] .  $lstr  ;	
+		shell_exec ('ln -s ' . $target . ' ' . $link);
+		
+		$element['#markup'] = '<TABLE id="link_box"> The link <a href=' . $linkhttpd . '>' . $link .  '</a> is created sucessfully<br>
+		<i>You might click on the link in order to double check that the link is working fine.</td><tr><th>To create another link , click <a href=http//www.vlkey.com/ceic/?q=createlink>here</a><br>To look at the file manager, click <a href=http://www.vlkey.com/ceic/?q=user/3699/imce>here</a></th></tr></TABLE>';
+		}
+		else 	{
+			//drupal_set_message('<pre>The link was not created,  check the target link in the imput box </pre>');
+			$element['#markup'] = '<TABLE id="link_box"> <td> The link was not created,  check the target link in the imput box  </td></TABLE>';		
+		  }
+	    return $element;
+	}
+	?>
+

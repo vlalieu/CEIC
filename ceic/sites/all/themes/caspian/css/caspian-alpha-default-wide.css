@@ -1,0 +1,58 @@
+/* This file will hold styles that are loaded using the same media query as the wide grid. */
+
+
+.page {
+	width: 1260px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+
+/* NAVIGATION SYSTEMS */
+/* Navigation Menu */
+
+.navigation-menu ul.menu {
+	margin-right: 10px;
+}
+.navigation-menu ul.menu li {
+	margin: 10px;
+}
+
+.navigation-menu li.leaf a {
+	width: 40px;
+	height: 40px;
+	text-indent: -99999px;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+.navigation-menu li a:link,
+.navigation-menu li a:visited {
+}
+
+.navigation-menu li.leaf a.m-publish {
+	background-position: 0 0;
+}
+.navigation-menu li.leaf a.m-search {
+	background-position: 0 -50px;
+}
+.navigation-menu li.leaf a.m-files {
+	background-position: 0 -100px;
+}
+.navigation-menu li.leaf a.m-stakeholders-projects {
+	background-position: 0 -150px;
+}
+.navigation-menu li.leaf a.m-admin-tools {
+	background-position: 0 -200px;
+}
+.navigation-menu li.leaf a.m-events {
+	background-position: 0 -250px;
+}
+.navigation-menu li.leaf a.m-manage-projects {
+	background-position: 0 -300px;
+}
+.navigation-menu li.leaf a.m-map {
+	background-position: 0 -350px;
+}
+.navigation-menu li.leaf a.m-my-account {
+	background-position: 0 -400px;
+}

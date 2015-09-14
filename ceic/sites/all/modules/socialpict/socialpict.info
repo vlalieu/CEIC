@@ -1,0 +1,6 @@
+name = socialpict Module
+description = "socialpict module."
+package = socialpict
+core = 7.x
+files[] = socialpict.module
+version = "1.01-dev"

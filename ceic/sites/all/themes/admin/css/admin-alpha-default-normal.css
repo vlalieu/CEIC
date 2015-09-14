@@ -1,0 +1,90 @@
+/* This file will hold styles that are loaded using the same media query as the normal grid. */
+/* If you are using the default media queries provided by Omega, these styles will also
+ *  apply to the widescreen layout unless they are overridden by the widescreen styles. */
+ 
+
+
+/* Thematic Menu */
+.ultimenu > li > a {
+	padding-left: .4em !important;
+	padding-right: .4em !important;
+}
+.tm-pollution {
+	background-position: 7px 0;
+}
+.tm-invspecies {
+	background-position: 7px -100px;
+}
+.tm-emergencies {
+	background-position: 7px -200px;
+}
+.tm-biodiversity {
+	background-position: 7px -300px;
+}
+.tm-seafluctuation {
+	background-position: 7px -400px;
+}
+.tm-other {
+	background-position: 7px -500px;
+}
+
+.tm-pollution.active {
+	background-position: -193px 0;
+}
+.tm-invspecies.active {
+	background-position: -193px -100px;
+}
+.tm-emergencies.active {
+	background-position: -193px -200px;
+}
+.tm-biodiversity.active {
+	background-position: -193px -300px;
+}
+.tm-seafluctuation.active {
+	background-position: -193px -400px;
+}
+.tm-other.active {
+	background-position: -193px -500px;
+}
+.tm-pollution:hover {
+	background-position: -93px 0;
+}
+.tm-invspecies:hover {
+	background-position: -93px -100px;
+}
+.tm-emergencies:hover {
+	background-position: -93px -200px;
+}
+.tm-biodiversity:hover {
+	background-position: -93px -300px;
+}
+.tm-seafluctuation:hover {
+	background-position: -93px -400px;
+}
+.tm-other:hover {
+	background-position: -93px -500px;
+}
+
+ 
+ 
+ /* Toolbox Menu */
+/* This is the default width of all vertical menus. */
+ul.nice-menu-right,
+ul.nice-menu-left,
+ul.nice-menu-right li,
+ul.nice-menu-left li {
+  width: 100px;
+}
+
+/* VERTICAL menus where submenus pop RIGHT (default). */
+ul.nice-menu-right ul {
+  width: 12.5em;
+  left: 100px;
+  top: -1px;
+}
+
+ul.nice-menu-right ul ul {
+  width: 12.5em;
+  left: 12.5em;
+  top: -1px;
+}

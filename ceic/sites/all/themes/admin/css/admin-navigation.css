@@ -1,0 +1,199 @@
+/* Country Selector */
+.form-item-country-select select {
+	background-color: #8fd7d4;
+	border: none;
+	font-weight: bold;
+}
+
+
+/* Thematic Menu */
+.thematic-menu-block {
+	text-transform: capitalize;
+	/*margin-top: 17px;*/
+}
+
+ul.ultimenu {
+	margin-bottom: 0;
+}
+.ultimenu > li > a {
+	display: inline-block;
+  -moz-transition: color 0;
+  -ms-transition: color 0;
+  -o-transition: color 0s;
+  -webkit-transition: color 0s;
+  transition: color 0s;
+}
+
+.tm-pollution,
+.tm-invspecies,
+.tm-emergencies,
+.tm-biodiversity,
+.tm-seafluctuation,
+.tm-other {
+	background-image: url('../img/thematic-menu-sprite.png');
+	background-repeat: no-repeat;
+	
+	padding-top: 40px !important;
+	padding-bottom: 0 !important;
+	width: 100px;
+	line-height: 16px;
+	text-align: center;
+	height: 40px !important;
+	vertical-align: middle !important;
+	font-weight: bold;
+}
+a.tm-pollution:link,
+a.tm-pollution:visited,
+a.tm-invspecies:link,
+a.tm-invspecies:visited,
+a.tm-emergencies:link,
+a.tm-emergencies:visited,
+a.tm-biodiversity:link,
+a.tm-biodiversity:visited,
+a.tm-seafluctuation:link,
+a.tm-seafluctuation:visited,
+a.tm-other:link,
+a.tm-other:visited {
+	color: #3e3e3e;
+  /*-moz-transition: background-position .5s ease;
+  -ms-transition: background-position .5s ease;
+  -o-transition: background-position .5s ease;
+  -webkit-transition: background-position .5s ease;
+  transition: background-position .5s ease;*/
+}
+a.tm-pollution.active,
+a.tm-invspecies.active,
+a.tm-emergencies.active,
+a.tm-biodiversity.active,
+a.tm-seafluctuation.active,
+a.tm-other.active {
+	color: #E86F56;
+}
+a.tm-pollution:hover,
+a.tm-invspecies:hover,
+a.tm-emergencies:hover,
+a.tm-biodiversity:hover,
+a.tm-seafluctuation:hover,
+a.tm-other:hover {
+	  color: #fff; 
+}
+
+
+/* Ultimenu */
+.ultimenu-ceic-thematic-pollution h2.pane-title {
+	font-size: 16px;
+}
+.ultimenu-ceic-thematic-invasive-species {
+	left: 380px;
+}
+.ultimenu-ceic-thematic-environmental-emergencies {
+	left: 500px;
+}
+.ultimenu-ceic-thematic-biodiversity {
+	left: 640px;
+}
+.ultimenu-ceic-thematic-other {
+	right: 50px !important;
+}
+
+
+/* Toolbox Menu */
+.toolbox-menu {
+}
+.toolbox-menu ul {
+	list-style-type: none;
+}
+.toolbox-menu ul.nice-menu li {
+  border: none;
+  border-top: 0;
+  float: left; /* LTR */
+  background-color: #eee;
+	margin: 0;
+	display: block;
+	list-style: none;
+	line-height: 130px;
+	background-color: #f6f6f6;
+	background-image: url('../img/admin-side-menu-bg.png');
+	background-repeat: repeat-y;
+	background-position: right;
+}
+.toolbox-menu ul.nice-menu li:hover {
+	background-color: #f6f6f6;
+	background-image: url('../img/admin-side-menu-bg-over.png');
+	background-repeat: repeat-y;
+	background-position: right;
+}
+.toolbox-menu ul.nice-menu li.active-trail {
+	background-color: #f6f6f6;
+	background-image: url('../img/admin-side-menu-bg-active.png');
+	background-repeat: repeat-y;
+	background-position: right;
+}
+.toolbox-menu ul.nice-menu li.last {
+	margin-bottom: 20px;
+}
+.toolbox-menu ul.nice-menu li a {
+	background-image: url('../img/sidebar-first-sprite.png');
+	background-repeat: no-repeat;
+	display: block;
+	text-align: center;
+	width: 110px;
+	height: 86px;
+	border-bottom: 1px solid #6B6261;
+	padding: 0;
+}
+.toolbox-menu ul.nice-menu li ul li {
+	top: 25px;
+	line-height: 20px;
+}
+.toolbox-menu ul.nice-menu li ul li a {
+	background-image: none;
+	height: 30px;
+	padding-top: 10px;
+}
+.toolbox-menu a:link,
+.toolbox-menu a:visited {
+	color: #fff;
+}
+.toolbox-menu a.active {
+	color: #3e3e3e;
+	border-bottom: 1px solid #7EBDBA;
+}
+a.btn-adm-files {
+	background-position: 0 0;
+}
+a.btn-adm-events {
+	background-position: 0 -100px;
+}
+a.btn-adm-org {
+	background-position: 0 -200px;
+}
+a.btn-adm-projects {
+	background-position: 0 -300px;
+}
+a.btn-adm-maps {
+	background-position: 0 -400px;
+}
+a.btn-adm-tools {
+	background-position: 0 -500px;
+}
+
+a.btn-adm-files.active {
+	background-position: -150px 0;
+}
+a.btn-adm-events.active {
+	background-position: -150px -100px;
+}
+a.btn-adm-org.active {
+	background-position: -150px -200px;
+}
+a.btn-adm-projects.active {
+	background-position: -150px -300px;
+}
+a.btn-adm-maps.active {
+	background-position: -150px -400px;
+}
+a.btn-adm-tools.active {
+	background-position: -150px -500px;
+}
+
